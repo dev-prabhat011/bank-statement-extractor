@@ -66,12 +66,16 @@ def health_check():
     }), 200
 
 # --- Logging Setup ---
+# Ensure logs directory exists
+logs_dir = os.path.join(app.root_path, 'logs')
+os.makedirs(logs_dir, exist_ok=True)
+
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(),  # Log to console
-        logging.FileHandler(os.path.join('logs', 'flask_app.log'))  # Log to file
+        logging.FileHandler(os.path.join(logs_dir, 'flask_app.log'))  # Log to file
     ]
 )
 logger = logging.getLogger(__name__)
@@ -263,10 +267,9 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 def load_user(user_id):
     """Loads user object for Flask-Login session management."""
     try:
-        logger.debug(f"Loading user: {user_id}")
         return User.get(user_id)
     except Exception as e:
-        logger.error(f"Error loading user {user_id}: {str(e)}")
+        print(f"⚠️ Error loading user {user_id}: {str(e)}")
         return None
 
 # --- Database Initialization ---
@@ -274,15 +277,20 @@ def init_db():
     """Initialize the database with required tables and admin user."""
     try:
         # Create database directory if it doesn't exist
-        db_dir = os.path.dirname(app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', ''))
-        if db_dir and not os.path.exists(db_dir):
-            os.makedirs(db_dir)
-            logger.info(f"Created database directory: {db_dir}")
+        db_uri = app.config['SQLALCHEMY_DATABASE_URI']
+        if db_uri.startswith('sqlite:///'):
+            db_path = db_uri.replace('sqlite:///', '')
+            db_dir = os.path.dirname(db_path)
+            if db_dir and not os.path.exists(db_dir):
+                os.makedirs(db_dir, exist_ok=True)
+                print(f"Created database directory: {db_dir}")
+        else:
+            print(f"Database URI: {db_uri}")
 
         # Create all tables
         with app.app_context():
             db.create_all()
-            logger.info("Created all database tables")
+            print("✅ Created all database tables")
 
             # Check if admin user exists
             admin = User.query.filter_by(email='admin@example.com').first()
@@ -298,7 +306,7 @@ def init_db():
                     active=True
                 )
                 db.session.add(admin)
-                logger.info("Created admin user")
+                print("✅ Created admin user")
 
                 # Create sample bank for admin
                 bank = Bank(
@@ -309,7 +317,7 @@ def init_db():
                     account_type='Savings'
                 )
                 db.session.add(bank)
-                logger.info("Created sample bank for admin")
+                print("✅ Created sample bank for admin")
 
                 # Create subscription for admin
                 subscription = Subscription(
@@ -320,26 +328,38 @@ def init_db():
                     end_date=datetime.utcnow() + timedelta(days=30)
                 )
                 db.session.add(subscription)
-                logger.info("Created subscription for admin")
+                print("✅ Created subscription for admin")
 
                 db.session.commit()
-                logger.info("Committed all changes to database")
+                print("✅ Committed all changes to database")
             else:
-                logger.info("Admin user already exists")
+                print("ℹ️ Admin user already exists")
 
     except Exception as e:
-        logger.error(f"Error initializing database: {str(e)}")
+        print(f"❌ Error initializing database: {str(e)}")
         raise
 
 # Initialize database on startup
-with app.app_context():
-    init_db()
+try:
+    with app.app_context():
+        init_db()
+        print("✅ Database initialized successfully")
+except Exception as e:
+    print(f"⚠️ Warning: Database initialization failed: {e}")
+    print("App will continue but some features may not work")
 
 # Define absolute paths for folders relative to the app's root path
-upload_folder_path = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
-output_folder_path = os.path.join(app.root_path, app.config['OUTPUT_FOLDER'])
-os.makedirs(upload_folder_path, exist_ok=True)
-os.makedirs(output_folder_path, exist_ok=True)
+try:
+    upload_folder_path = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
+    output_folder_path = os.path.join(app.root_path, app.config['OUTPUT_FOLDER'])
+    os.makedirs(upload_folder_path, exist_ok=True)
+    os.makedirs(output_folder_path, exist_ok=True)
+    print(f"✅ Created directories: {upload_folder_path}, {output_folder_path}")
+except Exception as e:
+    print(f"⚠️ Warning: Failed to create directories: {e}")
+    # Use fallback paths
+    upload_folder_path = 'uploads'
+    output_folder_path = 'outputs'
 
 # --- Google OAuth Configuration ---
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
@@ -358,8 +378,9 @@ if GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET:
             "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
         }
     }
+    print("✅ Google OAuth configured")
 else:
-    logger.warning("Google OAuth Client ID or Secret not configured. Google Login disabled.")
+    print("⚠️ Google OAuth Client ID or Secret not configured. Google Login disabled.")
 
 SCOPES = ['https://www.googleapis.com/auth/userinfo.profile',
           'https://www.googleapis.com/auth/userinfo.email',
@@ -1236,5 +1257,5 @@ def manage_subscription(subscription_id):
 if __name__ == '__main__':
     # For production, use a proper WSGI server like Gunicorn or Waitress
     # Example: gunicorn -w 4 'app:app'
-    logger.info("Starting Flask development server...")
+    print("🚀 Starting Flask development server...")
     app.run(debug=True, port=5000) # Use port 5000 to match redirect URI
