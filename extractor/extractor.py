@@ -129,6 +129,33 @@ class StatementExtractor:
                 logger.info(f"Bank detected: {parsing_info.get('bank_detected', 'unknown')}")
                 logger.info(f"Confidence score: {parsing_info.get('confidence_score', 0.0):.2f}")
             
+            # If unified parser fails, try legacy Kotak parser as fallback
+            if not transactions and parsing_info.get('bank_detected') == 'kotak':
+                if self._debug:
+                    print("🔄 Unified parser failed for Kotak, trying legacy parser...")
+                
+                try:
+                    from .parsers.kotak import parse_kotak_single_col
+                    import pandas as pd
+                    
+                    # Try to extract tables with tabula
+                    import tabula
+                    tables = tabula.read_pdf(self._impl.pdf_path, pages='all', multiple_tables=True)
+                    
+                    for table in tables:
+                        if table is not None and not table.empty:
+                            legacy_transactions = parse_kotak_single_col(table, debug=self._debug)
+                            if legacy_transactions:
+                                if self._debug:
+                                    print(f"✅ Legacy parser found {len(legacy_transactions)} transactions")
+                                transactions = legacy_transactions
+                                parsing_info['fallback_method'] = 'legacy_kotak_parser'
+                                break
+                    
+                except Exception as e:
+                    if self._debug:
+                        print(f"⚠️ Legacy parser fallback failed: {e}")
+            
             return transactions, parsing_info
                 
         except Exception as e:

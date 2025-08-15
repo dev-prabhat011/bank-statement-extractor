@@ -40,14 +40,17 @@ class UnifiedStatementParser:
                 'keywords': ['kotak mahindra bank', 'kmbl', 'kotak.com', 'withdrawal(dr)/deposit(cr)', 'narration', 'transaction details', 'debit', 'credit'],
                 'amount_patterns': [
                     r'(\d{1,3}(?:,\d{3})*\.?\d*)\s*\((Dr|Cr)\)',  # Primary: Dr/Cr pattern
-                    r'(\d{1,3}(?:,\d{3})*\.?\d*)',  # Fallback: any amount
                     r'(\d{1,3}(?:,\d{3})*\.?\d*)\s*(Dr|Cr)',  # Alternative: Dr/Cr without parentheses
+                    r'(\d{1,3}(?:,\d{3})*\.?\d*)',  # Fallback: any amount
+                    r'(\d+\.?\d*)',  # Most basic: any number
                 ],
                 'date_patterns': [
                     r'(\d{2}-\d{2}-\d{4})',  # DD-MM-YYYY
-                    r'(\d{2}\s+[A-Za-z]{3},\s+\d{4})',  # DD MMM, YYYY
                     r'(\d{2}/\d{2}/\d{4})',  # DD/MM/YYYY
+                    r'(\d{2}\s+[A-Za-z]{3},\s+\d{4})',  # DD MMM, YYYY
                     r'(\d{4}-\d{2}-\d{2})',  # YYYY-MM-DD
+                    r'(\d{1,2}-\d{1,2}-\d{2,4})',  # Flexible DD-MM-YYYY
+                    r'(\d{1,2}/\d{1,2}/\d{2,4})',  # Flexible DD/MM/YYYY
                 ],
                 'preferred_method': 'hybrid'  # Try both tabula and text
             },
@@ -463,20 +466,38 @@ class UnifiedStatementParser:
         
         if self.debug:
             print(f"   📄 Processing {len(lines)} lines of text...")
+            print(f"   🔍 First 10 lines for debugging:")
+            for i, line in enumerate(lines[:10]):
+                print(f"      Line {i+1}: '{line[:100]}...'")
         
         # Use bank-specific patterns
         amount_patterns = bank_config['amount_patterns']
         date_patterns = bank_config['date_patterns']
         
+        # Enhanced line processing with better filtering
         for line_num, line in enumerate(lines):
             line = line.strip()
-            if not line or len(line) < 20:
+            
+            # More lenient line filtering for Kotak statements
+            if not line:
+                continue
+            
+            # Skip obvious header/footer lines but be less restrictive
+            line_lower = line.lower()
+            if any(skip in line_lower for skip in ['page', 'opening balance', 'closing balance', 'total']):
                 continue
             
             # Try to match transaction pattern
             transaction = self._parse_transaction_line(line, amount_patterns, date_patterns)
             if transaction:
+                if self.debug:
+                    print(f"   ✅ Line {line_num+1}: Found transaction - {transaction['date']} | {transaction['amount']} | {transaction['description'][:50]}...")
                 transactions.append(transaction)
+            elif self.debug and len(line) > 30:  # Debug longer lines that might contain transactions
+                print(f"   🔍 Line {line_num+1}: No transaction found in: '{line[:80]}...'")
+        
+        if self.debug:
+            print(f"   📊 Total transactions found: {len(transactions)}")
         
         if track_method and transactions:
             parsing_info['successful_methods'].append('text_parsing')
@@ -491,8 +512,8 @@ class UnifiedStatementParser:
             # Skip header lines and empty lines
             line_lower = line.lower().strip()
             if (not line or 
-                any(header in line_lower for header in ['date', 'narration', 'withdrawal', 'deposit', 'balance', 'page', 'opening', 'closing']) or
-                line_lower.count(' ') < 3):  # Need at least some content
+                any(header in line_lower for header in ['page', 'opening balance', 'closing balance', 'total']) or
+                line_lower.count(' ') < 2):  # More lenient - need at least 2 words
                 return None
             
             # Try to find date with more flexible patterns
@@ -540,9 +561,20 @@ class UnifiedStatementParser:
                             continue
                 
                 if len(amounts) >= 2:
-                    # Assume first amount is transaction, last is balance
-                    transaction_amount = amounts[0]
-                    balance = amounts[-1]
+                    # For Kotak, try to identify which is transaction vs balance
+                    # Look for Dr/Cr indicators in the text
+                    if 'dr' in line_lower or 'debit' in line_lower:
+                        # If debit mentioned, first amount is likely transaction (negative)
+                        transaction_amount = -abs(amounts[0])
+                        balance = amounts[-1]
+                    elif 'cr' in line_lower or 'credit' in line_lower:
+                        # If credit mentioned, first amount is likely transaction (positive)
+                        transaction_amount = abs(amounts[0])
+                        balance = amounts[-1]
+                    else:
+                        # Default: assume first amount is transaction, last is balance
+                        transaction_amount = amounts[0]
+                        balance = amounts[-1]
                 elif len(amounts) == 1:
                     # Only one amount found - might be transaction amount
                     transaction_amount = amounts[0]
