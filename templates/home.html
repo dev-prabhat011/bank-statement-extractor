@@ -1,0 +1,878 @@
+{% extends "base.html" %}
+{% block title %}Bank Statement Extractor - Smart Financial Analysis for Everyone{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+<style>
+    .hero-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #322f34 100%);
+        color: white;
+    }
+    
+    .hero-gradient.dark-theme {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    }
+    
+    .feature-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border: 1px solid #f0f0f0;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+    
+    .feature-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+    
+    .feature-icon {
+        font-size: 2.5rem;
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+    
+    .use-case-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.06);
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .use-case-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 0 20px 20px 0;
+        border-color: transparent #667eea transparent transparent;
+        opacity: 0.3;
+    }
+    
+    .use-case-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .user-type-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        border: 1px solid #dee2e6;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .user-type-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .user-type-card:hover::before {
+        opacity: 1;
+    }
+    
+    .user-type-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 25px rgba(0,0,0,0.1);
+    }
+    
+    .user-type-icon {
+        font-size: 3rem;
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+    
+    .stats-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stats-section.dark-theme {
+        background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+    }
+    
+    .stat-card {
+        text-align: center;
+        padding: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(45deg, #fff, #f0f0f0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .cta-section {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .cta-section.dark-theme {
+        background: linear-gradient(135deg, #1e4d2b 0%, #1a5f3a 100%);
+    }
+    
+    .google-signin-btn {
+        background: white;
+        color: #333;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .google-signin-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        color: #333;
+        text-decoration: none;
+    }
+    
+    .google-signin-btn img {
+        height: 20px;
+        margin-right: 12px;
+    }
+    
+    .section-padding {
+        padding: 4rem 0;
+    }
+    
+    .section-heading {
+        text-align: center;
+        margin-bottom: 3rem;
+        font-weight: 700;
+        color: #2c3e50;
+        position: relative;
+    }
+    
+    .hero-section {
+        padding: 6rem 0 4rem 0;
+    }
+    
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 1.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.25rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+    }
+    
+    .step-number {
+        background: #667eea;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin: 0 auto 1rem auto;
+        transition: all 0.3s ease;
+    }
+    
+    .step-number:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .trust-badge {
+        background: white;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        margin: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .trust-badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+    }
+    
+    /* Dark theme styles with proper text contrast */
+    .dark-theme .feature-card,
+    .dark-theme .use-case-card,
+    .dark-theme .user-type-card,
+    .dark-theme .trust-badge {
+        background: #2c3034;
+        color: #f8f9fa;
+        border-color: #495057;
+    }
+    
+    .dark-theme .section-heading {
+        color: #f8f9fa;
+    }
+    
+    .dark-theme .section-heading::after {
+        background: linear-gradient(90deg, #4a90e2, #7b68ee);
+    }
+    
+    .dark-theme .bg-light {
+        background-color: #2c3034 !important;
+    }
+    
+    .dark-theme .text-muted {
+        color: #adb5bd !important;
+    }
+    
+    .dark-theme .user-type-card {
+        background: linear-gradient(135deg, #2c3034 0%, #495057 100%);
+        border-color: #6c757d;
+    }
+    
+    .dark-theme .feature-icon {
+        color: #4a90e2;
+    }
+    
+    .dark-theme .step-number {
+        background: #4a90e2;
+    }
+    
+    .dark-theme .step-number:hover {
+        box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+    }
+    
+    .dark-theme .badge.bg-primary {
+        background-color: #4a90e2 !important;
+    }
+    
+    .dark-theme .badge.bg-success {
+        background-color: #28a745 !important;
+    }
+    
+    .dark-theme .badge.bg-info {
+        background-color: #17a2b8 !important;
+    }
+    
+    .dark-theme .badge.bg-warning {
+        background-color: #ffc107 !important;
+        color: #212529 !important;
+    }
+    
+    /* Enhanced text contrast for dark theme */
+    .dark-theme h1, .dark-theme h2, .dark-theme h3, .dark-theme h4, .dark-theme h5, .dark-theme h6 {
+        color: #ffffff !important;
+    }
+    
+    .dark-theme p {
+        color: #e9ecef !important;
+    }
+    
+    .dark-theme .lead {
+        color: #dee2e6 !important;
+    }
+    
+    .dark-theme .display-4 {
+        color: #4a90e2 !important;
+    }
+    
+    .dark-theme .text-primary {
+        color: #4a90e2 !important;
+    }
+    
+    .dark-theme .text-success {
+        color: #28a745 !important;
+    }
+    
+    .dark-theme .text-info {
+        color: #17a2b8 !important;
+    }
+    
+    .dark-theme .text-warning {
+        color: #ffc107 !important;
+    }
+    
+    .dark-theme .text-danger {
+        color: #dc3545 !important;
+    }
+    
+    /* Theme toggle button */
+    .theme-toggle {
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        z-index: 1000;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+        color: white;
+        padding: 12px;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .theme-toggle:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    
+    .theme-toggle.dark-theme {
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+    }
+    
+    @media (max-width: 768px) {
+        .theme-toggle {
+            top: 80px;
+            right: 15px;
+            width: 45px;
+            height: 45px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main>
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <i class="bi bi-palette-fill"></i>
+    </button>
+
+    <!-- Hero Section -->
+    <section class="hero-section hero-gradient" id="heroSection">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 text-center text-lg-start">
+                    <h1 class="hero-title">Transform Bank Statements into Actionable Insights</h1>
+                    <p class="hero-subtitle">Extract, analyze, and export your financial data with AI-powered accuracy. Perfect for individuals, businesses, and financial professionals.</p>
+                    <div class="d-grid gap-3 d-md-flex justify-content-md-start justify-content-center">
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('index') }}" class="btn btn-light btn-lg px-5 py-3 fw-bold">
+                                <i class="bi bi-rocket-takeoff me-2"></i>Start Extracting Now
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('login') }}" class="btn btn-light btn-lg px-5 py-3 fw-bold">
+                                <i class="bi bi-rocket-takeoff me-2"></i>Start Extracting Now
+                            </a>
+                        {% endif %}
+                        <a href="#features" class="btn btn-outline-light btn-lg px-5 py-3">
+                            <i class="bi bi-info-circle me-2"></i>Learn More
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center">
+                    <img src="{{ url_for('static', filename='images/hero-image.jpg') }}" class="img-fluid rounded-3 shadow-lg" alt="Bank Statement Analysis" style="max-width: 500px;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section py-5" id="statsSection">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <div class="stat-number">99.9%</div>
+                        <div>Accuracy Rate</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <div class="stat-number">50+</div>
+                        <div>Bank Formats</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <div class="stat-number">10K+</div>
+                        <div>Statements Processed</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card">
+                        <div class="stat-number">24/7</div>
+                        <div>Availability</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="section-padding bg-light">
+        <div class="container">
+            <h2 class="section-heading">Powerful Features for Every Need</h2>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <i class="bi bi-shield-check feature-icon"></i>
+                        <h5 class="fw-bold">Bank-Level Security</h5>
+                        <p class="text-muted">End-to-end encryption, secure file handling, and automatic cleanup. Your data never leaves our secure environment.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <i class="bi bi-brain feature-icon"></i>
+                        <h5 class="fw-bold">AI-Powered Analysis</h5>
+                        <p class="text-muted">Smart detection of recurring payments, salary credits, EMIs, and spending patterns with intelligent categorization.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <i class="bi bi-lightning-charge feature-icon"></i>
+                        <h5 class="fw-bold">Lightning Fast</h5>
+                        <p class="text-muted">Process statements in seconds, not hours. Get your data ready for analysis in under 30 seconds.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <i class="bi bi-gear-wide-connected feature-icon"></i>
+                        <h5 class="fw-bold">Universal Compatibility</h5>
+                        <p class="text-muted">Works with all major banks including HDFC, Kotak, SBI, ICICI, and international banks. Password-protected PDFs supported.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Use Cases Section -->
+    <section class="section-padding bg-light" id="useCasesSection">
+        <div class="container">
+            <h2 class="section-heading">Real-World Use Cases</h2>
+            <div class="row mb-4">
+                <div class="col-12 d-flex flex-wrap gap-2 justify-content-center">
+                    <button class="btn btn-sm btn-outline-primary usecase-filter active" data-filter="all">All</button>
+                    <button class="btn btn-sm btn-outline-primary usecase-filter" data-filter="business">Business</button>
+                    <button class="btn btn-sm btn-outline-primary usecase-filter" data-filter="personal">Personal</button>
+                    <button class="btn btn-sm btn-outline-primary usecase-filter" data-filter="loan">Loans</button>
+                    <button class="btn btn-sm btn-outline-primary usecase-filter" data-filter="tax">Tax</button>
+                    <button class="btn btn-sm btn-outline-primary usecase-filter" data-filter="advisory">Advisory</button>
+                    <button class="btn btn-sm btn-outline-primary usecase-filter" data-filter="audit">Audit</button>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6 usecase-item" data-tags="business tax">
+                    <div class="use-case-card">
+                        <i class="bi bi-briefcase text-primary mb-3" style="font-size: 2rem;"></i>
+                        <h5 class="fw-bold">Business Expense Tracking</h5>
+                        <p class="text-muted">Extract business transactions, categorize expenses, and generate reports for accounting and tax purposes.</p>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Automated expense categorization</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Export to accounting software</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Compliance-ready reports</li>
+                        </ul>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <div>
+                                <span class="badge bg-primary me-1">Business</span>
+                                <span class="badge bg-warning text-dark">Tax</span>
+                            </div>
+                            <a href="{{ url_for('login') if not current_user.is_authenticated else url_for('index') }}" class="btn btn-sm btn-outline-primary">Try it</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6 usecase-item" data-tags="personal">
+                    <div class="use-case-card">
+                        <i class="bi bi-graph-up text-primary mb-3" style="font-size: 2rem;"></i>
+                        <h5 class="fw-bold">Personal Finance Management</h5>
+                        <p class="text-muted">Track spending habits, identify saving opportunities, and monitor recurring payments for better financial planning.</p>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Spending pattern analysis</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Budget optimization insights</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Financial goal tracking</li>
+                        </ul>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <div>
+                                <span class="badge bg-info">Personal</span>
+                            </div>
+                            <a href="{{ url_for('login') if not current_user.is_authenticated else url_for('index') }}" class="btn btn-sm btn-outline-primary">Try it</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6 usecase-item" data-tags="loan personal">
+                    <div class="use-case-card">
+                        <i class="bi bi-building text-primary mb-3" style="font-size: 2rem;"></i>
+                        <h5 class="fw-bold">Loan & Mortgage Applications</h5>
+                        <p class="text-muted">Generate clean financial statements for loan applications, mortgage approvals, and credit assessments.</p>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Income verification</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Expense analysis</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Lender-ready formats</li>
+                        </ul>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <div>
+                                <span class="badge bg-warning text-dark me-1">Loans</span>
+                                <span class="badge bg-info">Personal</span>
+                            </div>
+                            <a href="{{ url_for('login') if not current_user.is_authenticated else url_for('index') }}" class="btn btn-sm btn-outline-primary">Try it</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6 usecase-item" data-tags="tax personal">
+                    <div class="use-case-card">
+                        <i class="bi bi-calculator text-primary mb-3" style="font-size: 2rem;"></i>
+                        <h5 class="fw-bold">Tax Preparation</h5>
+                        <p class="text-muted">Extract and organize financial data for tax filing, ensuring accuracy and compliance with tax regulations.</p>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Income documentation</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Deduction tracking</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Audit-ready records</li>
+                        </ul>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <div>
+                                <span class="badge bg-warning text-dark me-1">Tax</span>
+                                <span class="badge bg-info">Personal</span>
+                            </div>
+                            <a href="{{ url_for('login') if not current_user.is_authenticated else url_for('index') }}" class="btn btn-sm btn-outline-primary">Try it</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6 usecase-item" data-tags="advisory business">
+                    <div class="use-case-card">
+                        <i class="bi bi-people text-primary mb-3" style="font-size: 2rem;"></i>
+                        <h5 class="fw-bold">Financial Advisory</h5>
+                        <p class="text-muted">Provide clients with clean, analyzed financial data for better investment decisions and financial planning.</p>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Client portfolio analysis</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Investment recommendations</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Risk assessment</li>
+                        </ul>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <div>
+                                <span class="badge bg-primary me-1">Business</span>
+                                <span class="badge bg-info">Advisory</span>
+                            </div>
+                            <a href="{{ url_for('login') if not current_user.is_authenticated else url_for('index') }}" class="btn btn-sm btn-outline-primary">Try it</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6 usecase-item" data-tags="audit business">
+                    <div class="use-case-card">
+                        <i class="bi bi-file-earmark-text text-primary mb-3" style="font-size: 2rem;"></i>
+                        <h5 class="fw-bold">Audit & Compliance</h5>
+                        <p class="text-muted">Generate comprehensive financial reports for internal audits, regulatory compliance, and financial reviews.</p>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Regulatory reporting</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Internal audit support</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Compliance documentation</li>
+                        </ul>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <div>
+                                <span class="badge bg-primary me-1">Business</span>
+                                <span class="badge bg-secondary">Audit</span>
+                            </div>
+                            <a href="{{ url_for('login') if not current_user.is_authenticated else url_for('index') }}" class="btn btn-sm btn-outline-primary">Try it</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional use cases -->
+                <div class="col-lg-4 col-md-6 usecase-item" data-tags="business">
+                    <div class="use-case-card">
+                        <i class="bi bi-receipt-cutoff text-primary mb-3" style="font-size: 2rem;"></i>
+                        <h5 class="fw-bold">Vendor Payment Reconciliation</h5>
+                        <p class="text-muted">Match outgoing payments with invoices to reduce reconciliation time and prevent duplicate payments.</p>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Auto-matching rules</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Discrepancy flags</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Exportable summaries</li>
+                        </ul>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <div>
+                                <span class="badge bg-primary">Business</span>
+                            </div>
+                            <a href="{{ url_for('login') if not current_user.is_authenticated else url_for('index') }}" class="btn btn-sm btn-outline-primary">Try it</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6 usecase-item" data-tags="personal loan">
+                    <div class="use-case-card">
+                        <i class="bi bi-cash-coin text-primary mb-3" style="font-size: 2rem;"></i>
+                        <h5 class="fw-bold">EMI Detection & Tracking</h5>
+                        <p class="text-muted">Automatically detect recurring EMIs via NACH or card payments, track amounts and dates, and flag anomalies.</p>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Recurring payment detection</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Missed/changed EMI alerts</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Month-wise summary</li>
+                        </ul>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <div>
+                                <span class="badge bg-info me-1">Personal</span>
+                                <span class="badge bg-warning text-dark">Loans</span>
+                            </div>
+                            <a href="{{ url_for('login') if not current_user.is_authenticated else url_for('index') }}" class="btn btn-sm btn-outline-primary">Try it</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Target Users Section -->
+    <section class="section-padding bg-light" id="targetUsersSection">
+        <div class="container">
+            <h2 class="section-heading">Who Can Benefit?</h2>
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="user-type-card">
+                        <i class="bi bi-person user-type-icon"></i>
+                        <h5 class="fw-bold">Individuals</h5>
+                        <p class="text-muted">Personal finance management, expense tracking, and financial planning for better money management.</p>
+                        <div class="mt-3">
+                            <span class="badge bg-primary me-1">Personal Budgeting</span>
+                            <span class="badge bg-primary me-1">Expense Tracking</span>
+                            <span class="badge bg-primary">Financial Goals</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="user-type-card">
+                        <i class="bi bi-briefcase user-type-icon"></i>
+                        <h5 class="fw-bold">Small Businesses</h5>
+                        <p class="text-muted">Business expense management, accounting integration, and financial reporting for growth and compliance.</p>
+                        <div class="mt-3">
+                            <span class="badge bg-success me-1">Expense Management</span>
+                            <span class="badge bg-success me-1">Accounting</span>
+                            <span class="badge bg-success">Tax Preparation</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="user-type-card">
+                        <i class="bi bi-building user-type-icon"></i>
+                        <h5 class="fw-bold">Financial Professionals</h5>
+                        <p class="text-muted">Client data analysis, investment planning, and financial advisory services with clean, structured data.</p>
+                        <div class="mt-3">
+                            <span class="badge bg-info me-1">Client Analysis</span>
+                            <span class="badge bg-info me-1">Investment Planning</span>
+                            <span class="badge bg-info">Risk Assessment</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="user-type-card">
+                        <i class="bi bi-bank user-type-icon"></i>
+                        <h5 class="fw-bold">Enterprises</h5>
+                        <p class="text-muted">Large-scale financial data processing, compliance reporting, and enterprise financial management systems.</p>
+                        <div class="mt-3">
+                            <span class="badge bg-warning me-1">Compliance</span>
+                            <span class="badge bg-warning me-1">Audit Support</span>
+                            <span class="badge bg-warning">Enterprise Integration</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="section-padding bg-light" id="howItWorksSection">
+        <div class="container">
+            <h2 class="section-heading">Get Started in 3 Simple Steps</h2>
+            <div class="row text-center">
+                <div class="col-md-4 mb-4">
+                    <div class="step-number">1</div>
+                    <h5 class="fw-bold">Upload Your Statement</h5>
+                    <p class="text-muted">Securely upload your PDF bank statement. We support all major banks and password-protected files.</p>
+                    <i class="bi bi-cloud-arrow-up display-4 text-primary"></i>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="step-number">2</div>
+                    <h5 class="fw-bold">AI-Powered Processing</h5>
+                    <p class="text-muted">Our advanced AI analyzes your statement, extracts data, and identifies key financial patterns automatically.</p>
+                    <i class="bi bi-gear-wide-connected display-4 text-primary"></i>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="step-number">3</div>
+                    <h5 class="fw-bold">Download & Analyze</h5>
+                    <p class="text-muted">Get your structured data in Excel or XML format, ready for analysis, reporting, or integration.</p>
+                    <i class="bi bi-download display-4 text-primary"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Section -->
+    <section class="section-padding bg-light" id="trustSection">
+        <div class="container">
+            <h2 class="section-heading">Trusted by Professionals Worldwide</h2>
+            <p class="lead text-center mb-5 text-muted">Built with enterprise-grade technology and security standards</p>
+            <div class="row justify-content-center">
+                <div class="col-md-3 col-6 text-center mb-4">
+                    <div class="trust-badge">
+                        <img src="{{ url_for('static', filename='images/python-logo.png') }}" alt="Python" style="height: 50px;">
+                        <div class="mt-2 fw-bold">Python</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 text-center mb-4">
+                    <div class="trust-badge">
+                        <span class="h2 fw-bold text-primary">Flask</span>
+                        <div class="mt-2 fw-bold">Framework</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 text-center mb-4">
+                    <div class="trust-badge">
+                        <img src="{{ url_for('static', filename='images/security-badge.png') }}" alt="Security" style="height: 50px;">
+                        <div class="mt-2 fw-bold">Security</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 text-center mb-4">
+                    <div class="trust-badge">
+                        <i class="bi bi-shield-check display-4 text-success"></i>
+                        <div class="mt-2 fw-bold">GDPR Compliant</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="cta-section section-padding text-center" id="ctaSection">
+        <div class="container">
+            <h2 class="mb-4 fw-bold">Ready to Transform Your Financial Data?</h2>
+            <p class="lead mb-4">Join thousands of users who trust our platform for secure, accurate, and fast bank statement analysis.</p>
+            {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('google_login') }}" class="google-signin-btn btn-lg">
+                    <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo">
+                    <span>Sign in with Google to Get Started</span>
+                </a>
+                <div class="mt-3">
+                    <small class="text-white-50">No credit card required • Free to start • Instant access</small>
+                </div>
+            {% else %}
+                <a href="{{ url_for('index') }}" class="btn btn-light btn-lg px-5 py-3 fw-bold">
+                    <i class="bi bi-speedometer2 me-2"></i>Go to Analyzer Tool
+                </a>
+            {% endif %}
+        </div>
+    </section>
+</main>
+
+<!-- Theme Toggle Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const themeToggle = document.getElementById('themeToggle');
+    const heroSection = document.getElementById('heroSection');
+    const statsSection = document.getElementById('statsSection');
+    const featuresSection = document.getElementById('features');
+    const useCasesSection = document.getElementById('useCasesSection');
+    const targetUsersSection = document.getElementById('targetUsersSection');
+    const howItWorksSection = document.getElementById('howItWorksSection');
+    const trustSection = document.getElementById('trustSection');
+    const ctaSection = document.getElementById('ctaSection');
+    
+    // Check for saved theme preference or default to light
+    const currentTheme = localStorage.getItem('landingTheme') || 'light';
+    applyTheme(currentTheme);
+    
+    themeToggle.addEventListener('click', function() {
+        const currentTheme = document.body.classList.contains('dark-theme') ? 'light' : 'dark';
+        applyTheme(currentTheme);
+        localStorage.setItem('landingTheme', currentTheme);
+    });
+    
+    function applyTheme(theme) {
+        if (theme === 'dark') {
+            document.body.classList.add('dark-theme');
+            heroSection.classList.add('dark-theme');
+            statsSection.classList.add('dark-theme');
+            if (featuresSection) featuresSection.classList.add('dark-theme');
+            useCasesSection.classList.add('dark-theme');
+            targetUsersSection.classList.add('dark-theme');
+            howItWorksSection.classList.add('dark-theme');
+            trustSection.classList.add('dark-theme');
+            ctaSection.classList.add('dark-theme');
+            themeToggle.classList.add('dark-theme');
+            themeToggle.innerHTML = '<i class="bi bi-sun-fill"></i>';
+        } else {
+            document.body.classList.remove('dark-theme');
+            heroSection.classList.remove('dark-theme');
+            statsSection.classList.remove('dark-theme');
+            if (featuresSection) featuresSection.classList.remove('dark-theme');
+            useCasesSection.classList.remove('dark-theme');
+            targetUsersSection.classList.remove('dark-theme');
+            howItWorksSection.classList.remove('dark-theme');
+            trustSection.classList.remove('dark-theme');
+            ctaSection.classList.remove('dark-theme');
+            themeToggle.classList.remove('dark-theme');
+            themeToggle.innerHTML = '<i class="bi bi-palette-fill"></i>';
+        }
+    }
+    // Use case filtering
+    const filterButtons = document.querySelectorAll('.usecase-filter');
+    const items = document.querySelectorAll('.usecase-item');
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const filter = btn.getAttribute('data-filter');
+            items.forEach(item => {
+                const tags = (item.getAttribute('data-tags') || '').split(/\s+/);
+                if (filter === 'all' || tags.includes(filter)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

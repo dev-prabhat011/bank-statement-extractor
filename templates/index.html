@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block title %}Bank Statement Extractor{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="container main-container my-5">
+    <div class="header">
+        <h1>Bank Statement PDF Extractor</h1>
+        <p class="lead">Upload your bank statement PDF to extract transactions to Excel or XML</p>
+    </div>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-danger">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="card shadow-sm upload-form mb-4">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('upload_file') }}" enctype="multipart/form-data">
+                <div class="mb-4">
+                    <label for="file" class="form-label">Select Bank Statement PDF:</label>
+                    <input type="file" class="form-control" id="file" name="file" accept=".pdf" required>
+                </div>
+                <div class="bank-name-section mb-3">
+                    <label for="bank_name" class="form-label">Bank Name:</label>
+                    <select class="form-select" id="bank_name" name="bank_name" onchange="toggleOtherBankField()">
+                        <option value="">Select Bank</option>
+                        <optgroup label="Indian Banks">
+                            <option value="HDFC BANK">HDFC Bank</option>
+                            <option value="ICICI BANK">ICICI Bank</option>
+                            <option value="AXIS BANK">Axis Bank</option>
+                            <option value="STATE BANK OF INDIA">State Bank of India</option>
+                            <option value="PUNJAB NATIONAL BANK">Punjab National Bank</option>
+                            <option value="BANK OF BARODA">Bank of Baroda</option>
+                            <option value="KOTAK MAHINDRA BANK">Kotak Mahindra Bank</option>
+                            <option value="YES BANK">Yes Bank</option>
+                            <option value="INDUSIND BANK">IndusInd Bank</option>
+                            <option value="IDFC FIRST BANK">IDFC First Bank</option>
+                            <option value="FEDERAL BANK">Federal Bank</option>
+                            <option value="CANARA BANK">Canara Bank</option>
+                            <option value="UNION BANK OF INDIA">Union Bank of India</option>
+                            <option value="BANK OF INDIA">Bank of India</option>
+                            <option value="INDIAN BANK">Indian Bank</option>
+                            <option value="INDIAN OVERSEAS BANK">Indian Overseas Bank</option>
+                            <option value="UCO BANK">UCO Bank</option>
+                            <option value="PUNJAB & SIND BANK">Punjab & Sind Bank</option>
+                            <option value="CENTRAL BANK OF INDIA">Central Bank of India</option>
+                            <option value="BANK OF MAHARASHTRA">Bank of Maharashtra</option>
+                        </optgroup>
+                        <optgroup label="International Banks">
+                            <option value="CITIBANK">Citibank</option>
+                            <option value="HSBC BANK">HSBC Bank</option>
+                            <option value="STANDARD CHARTERED BANK">Standard Chartered Bank</option>
+                            <option value="DEUTSCHE BANK">Deutsche Bank</option>
+                            <option value="BARCLAYS BANK">Barclays Bank</option>
+                            <option value="JP MORGAN CHASE">JP Morgan Chase</option>
+                            <option value="BANK OF AMERICA">Bank of America</option>
+                            <option value="WELLS FARGO">Wells Fargo</option>
+                            <option value="GOLDMAN SACHS">Goldman Sachs</option>
+                            <option value="MORGAN STANLEY">Morgan Stanley</option>
+                            <option value="UBS BANK">UBS Bank</option>
+                            <option value="CREDIT SUISSE">Credit Suisse</option>
+                            <option value="BNP PARIBAS">BNP Paribas</option>
+                            <option value="SOCIETE GENERALE">Societe Generale</option>
+                            <option value="SANTANDER BANK">Santander Bank</option>
+                            <option value="ING BANK">ING Bank</option>
+                            <option value="UNICREDIT BANK">UniCredit Bank</option>
+                            <option value="CREDIT AGRICOLE">Credit Agricole</option>
+                            <option value="ROYAL BANK OF CANADA">Royal Bank of Canada</option>
+                            <option value="TD BANK">TD Bank</option>
+                            <option value="COMMONWEALTH BANK">Commonwealth Bank</option>
+                            <option value="WESTPAC BANK">Westpac Bank</option>
+                            <option value="ANZ BANK">ANZ Bank</option>
+                            <option value="NATIONAL AUSTRALIA BANK">National Australia Bank</option>
+                        </optgroup>
+                        <option value="OTHER">Other (Specify)</option>
+                    </select>
+                    <div id="other_bank_field" class="mt-2" style="display: none;">
+                        <input type="text" class="form-control" id="other_bank_name" name="other_bank_name" placeholder="Enter bank name">
+                    </div>
+                    <div class="form-text">Select your bank to ensure accurate bank name recognition in the exported files</div>
+                </div>
+                <div class="date-range-section row mb-3">
+                    <div class="col-12 mb-2">
+                        <label class="form-label">Statement Period:</label>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="start_date" class="form-label">Start Date:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="MM/YYYY" autocomplete="off" required>
+                            <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="end_date" class="form-label">End Date:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="MM/YYYY" autocomplete="off" required>
+                            <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-text">Specify the date range covered by your statement to ensure accurate date processing</div>
+                    </div>
+                </div>
+                <div class="password-section mb-3">
+                    <label for="password" class="form-label">PDF Password (if protected):</label>
+                    <input type="password" class="form-control" id="password" name="password">
+                    <div class="form-text">Leave blank if your PDF is not password protected</div>
+                </div>
+                <div class="mb-4 mt-4">
+                    <div class="form-label">Output Formats:</div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="excel" name="excel" checked>
+                        <label class="form-check-label" for="excel">Excel (.xlsx)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="xml" name="xml" checked>
+                        <label class="form-check-label" for="xml">XML</label>
+                    </div>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">Process Statement</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="instructions card card-body bg-light border-0 shadow-sm">
+        <h4>Instructions:</h4>
+        <ol>
+            <li>Upload your bank statement PDF file (max 16MB)</li>
+            <li>Specify the statement period (start and end dates)</li>
+            <li>If your PDF is password protected, enter the password</li>
+            <li>Select the output format(s) you need</li>
+            <li>Click "Process Statement"</li>
+            <li>Review the extracted data and download the files</li>
+        </ol>
+        <p class="text-muted"><small>Note: This tool works best with standard bank statement formats. Some custom or highly specialized formats may require adjustments.</small></p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $('.datepicker').datepicker({
+            format: "mm/yyyy",
+            startView: "months", 
+            minViewMode: "months",
+            autoclose: true
+        });
+    });
+    function toggleOtherBankField() {
+        var bankSelect = document.getElementById('bank_name');
+        var otherBankField = document.getElementById('other_bank_field');
+        if (bankSelect.value === 'OTHER') {
+            otherBankField.style.display = 'block';
+            document.getElementById('other_bank_name').required = true;
+        } else {
+            otherBankField.style.display = 'none';
+            document.getElementById('other_bank_name').required = false;
+        }
+    }
+</script>
+{% endblock %}

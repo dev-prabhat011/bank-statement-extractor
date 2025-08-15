@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Bank Account Extractor{% endblock %}</title>
+    <meta name="description" content="Smart financial analysis tool for extracting and analyzing bank statements">
+    <meta name="keywords" content="bank statement, financial analysis, PDF extractor, transaction analysis">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm" role="navigation" aria-label="Main navigation">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('home_page') }}" aria-label="Bank Account Extractor Home">
+                <i class="bi bi-bank2 me-2"></i>Bank Account Extractor
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('home_page') }}#features" aria-label="Features section">
+                            <i class="bi bi-star me-1"></i>Features
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('home_page') }}#useCasesSection" aria-label="Use cases section">
+                            <i class="bi bi-lightbulb me-1"></i>Use Cases
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('home_page') }}#howItWorksSection" aria-label="How it works section">
+                            <i class="bi bi-question-circle me-1"></i>How it works
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('pricing_page') }}" aria-label="Pricing information">
+                            <i class="bi bi-tag me-1"></i>Pricing
+                        </a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" 
+                               aria-expanded="false" aria-label="User menu">
+                                <i class="bi bi-person-circle me-1"></i>{{ current_user.name }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{{ url_for('index') }}">
+                                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('password_page') }}">
+                                    <i class="bi bi-key me-2"></i>Change Password
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                </a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}" aria-label="Login to your account">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                            </a>
+                        </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <button class="btn btn-link nav-link" id="darkModeToggle" title="Toggle dark mode" 
+                                aria-label="Toggle dark mode" aria-pressed="false">
+                            <i class="bi bi-moon-fill"></i>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main role="main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="py-4 bg-light mt-auto border-top" role="contentinfo">
+        <div class="container text-center">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-md-start">
+                    <small class="text-muted">&copy; 2024 Bank Account Extractor</small>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <small class="text-muted">
+                        <a href="#" class="text-decoration-none me-3">Privacy Policy</a>
+                        <a href="#" class="text-decoration-none">Terms of Service</a>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+    <script>
+    // Enhanced dark mode toggle with persistence
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggle = document.getElementById('darkModeToggle');
+        const html = document.documentElement;
+        
+        // Load saved theme preference
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-bs-theme', savedTheme);
+        updateToggleButton(savedTheme === 'dark');
+        
+        if (toggle) {
+            toggle.addEventListener('click', function() {
+                const currentTheme = html.getAttribute('data-bs-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                html.setAttribute('data-bs-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateToggleButton(newTheme === 'dark');
+                
+                // Announce theme change for screen readers
+                const announcement = document.createElement('div');
+                announcement.setAttribute('aria-live', 'polite');
+                announcement.setAttribute('aria-atomic', 'true');
+                announcement.className = 'sr-only';
+                announcement.textContent = `Switched to ${newTheme} theme`;
+                document.body.appendChild(announcement);
+                
+                setTimeout(() => {
+                    document.body.removeChild(announcement);
+                }, 1000);
+            });
+        }
+        
+        function updateToggleButton(isDark) {
+            const icon = toggle.querySelector('i');
+            const ariaPressed = toggle.getAttribute('aria-pressed');
+            
+            if (isDark) {
+                icon.className = 'bi bi-sun-fill';
+                toggle.setAttribute('aria-pressed', 'true');
+                toggle.title = 'Switch to light mode';
+            } else {
+                icon.className = 'bi bi-moon-fill';
+                toggle.setAttribute('aria-pressed', 'false');
+                toggle.title = 'Switch to dark mode';
+            }
+        }
+        
+        // Add keyboard navigation support
+        document.addEventListener('keydown', function(e) {
+            if (e.altKey && e.key === 't') {
+                e.preventDefault();
+                toggle.click();
+            }
+        });
+    });
+    
+    // Add loading state management
+    window.addEventListener('beforeunload', function() {
+        document.body.classList.add('loading');
+    });
+    
+    // Remove loading state when page is fully loaded
+    window.addEventListener('load', function() {
+        document.body.classList.remove('loading');
+    });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html> 
