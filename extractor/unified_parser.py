@@ -38,8 +38,17 @@ class UnifiedStatementParser:
         self.bank_configs = {
             'kotak': {
                 'keywords': ['kotak mahindra bank', 'kmbl', 'kotak.com', 'withdrawal(dr)/deposit(cr)', 'narration', 'transaction details', 'debit', 'credit'],
-                'amount_patterns': [r'(\d{1,3}(?:,\d{3})*\.?\d*)\s*\((Dr|Cr)\)', r'(\d{1,3}(?:,\d{3})*\.?\d*)'],
-                'date_patterns': [r'(\d{2}-\d{2}-\d{4})', r'(\d{2}\s+[A-Za-z]{3},\s+\d{4})'],
+                'amount_patterns': [
+                    r'(\d{1,3}(?:,\d{3})*\.?\d*)\s*\((Dr|Cr)\)',  # Primary: Dr/Cr pattern
+                    r'(\d{1,3}(?:,\d{3})*\.?\d*)',  # Fallback: any amount
+                    r'(\d{1,3}(?:,\d{3})*\.?\d*)\s*(Dr|Cr)',  # Alternative: Dr/Cr without parentheses
+                ],
+                'date_patterns': [
+                    r'(\d{2}-\d{2}-\d{4})',  # DD-MM-YYYY
+                    r'(\d{2}\s+[A-Za-z]{3},\s+\d{4})',  # DD MMM, YYYY
+                    r'(\d{2}/\d{2}/\d{4})',  # DD/MM/YYYY
+                    r'(\d{4}-\d{2}-\d{2})',  # YYYY-MM-DD
+                ],
                 'preferred_method': 'hybrid'  # Try both tabula and text
             },
             'hdfc': {
@@ -479,11 +488,14 @@ class UnifiedStatementParser:
     def _parse_transaction_line(self, line: str, amount_patterns: List[str], date_patterns: List[str]) -> Optional[Dict[str, Any]]:
         """Parse a single transaction line using flexible patterns."""
         try:
-            # Skip header lines
-            if any(header in line.lower() for header in ['date', 'narration', 'withdrawal', 'deposit', 'balance', 'page']):
+            # Skip header lines and empty lines
+            line_lower = line.lower().strip()
+            if (not line or 
+                any(header in line_lower for header in ['date', 'narration', 'withdrawal', 'deposit', 'balance', 'page', 'opening', 'closing']) or
+                line_lower.count(' ') < 3):  # Need at least some content
                 return None
             
-            # Try to find date
+            # Try to find date with more flexible patterns
             date_str = None
             for pattern in date_patterns:
                 match = re.search(pattern, line)
@@ -494,59 +506,128 @@ class UnifiedStatementParser:
             if not date_str:
                 return None
             
-            # Try to find amounts and balance
-            amounts = []
-            for pattern in amount_patterns:
-                matches = re.finditer(pattern, line)
-                for match in matches:
-                    if len(match.groups()) >= 2:  # Has Dr/Cr indicator
-                        amount_val = float(match.group(1).replace(',', ''))
-                        amount_type = match.group(2)
-                        if amount_type == 'Dr':
-                            amount_val = -amount_val
-                        amounts.append(amount_val)
-                    else:  # Just amount
-                        amount_val = float(match.group(1).replace(',', ''))
-                        amounts.append(amount_val)
+            # Enhanced amount parsing - look for Dr/Cr indicators first
+            transaction_amount = None
+            balance = None
+            dr_cr_indicator = None
             
-            if len(amounts) < 2:  # Need at least transaction amount and balance
+            # First, try to find Dr/Cr pattern
+            dr_cr_pattern = r'(\d{1,3}(?:,\d{3})*\.?\d*)\s*\((Dr|Cr)\)'
+            dr_cr_match = re.search(dr_cr_pattern, line)
+            
+            if dr_cr_match:
+                # Found Dr/Cr pattern - this is likely the transaction amount
+                transaction_amount = float(dr_cr_match.group(1).replace(',', ''))
+                dr_cr_indicator = dr_cr_match.group(2)
+                if dr_cr_indicator == 'Dr':
+                    transaction_amount = -transaction_amount
+                
+                # Look for balance after the Dr/Cr amount
+                remaining_line = line[dr_cr_match.end():]
+                balance_match = re.search(r'(\d{1,3}(?:,\d{3})*\.?\d*)', remaining_line)
+                if balance_match:
+                    balance = float(balance_match.group(1).replace(',', ''))
+            else:
+                # No Dr/Cr pattern - try to find multiple amounts
+                amounts = []
+                for pattern in amount_patterns:
+                    matches = re.finditer(pattern, line)
+                    for match in matches:
+                        try:
+                            amount_val = float(match.group(1).replace(',', ''))
+                            amounts.append(amount_val)
+                        except ValueError:
+                            continue
+                
+                if len(amounts) >= 2:
+                    # Assume first amount is transaction, last is balance
+                    transaction_amount = amounts[0]
+                    balance = amounts[-1]
+                elif len(amounts) == 1:
+                    # Only one amount found - might be transaction amount
+                    transaction_amount = amounts[0]
+                    balance = None
+            
+            if transaction_amount is None:
                 return None
             
-            # Extract description (between date and first amount)
+            # Extract description more reliably
+            # Find the position after the date
             date_end = line.find(date_str) + len(date_str)
-            # Find first amount position
+            
+            # Find the position of the first amount
             first_amount_pos = len(line)
             for pattern in amount_patterns:
                 match = re.search(pattern, line)
                 if match:
                     first_amount_pos = min(first_amount_pos, match.start())
             
-            description = line[date_end:first_amount_pos].strip()
+            # Extract description between date and first amount
+            if first_amount_pos > date_end:
+                description = line[date_end:first_amount_pos].strip()
+            else:
+                # Fallback: take text after date, excluding amounts
+                description = line[date_end:].strip()
+                # Remove amounts from description
+                for pattern in amount_patterns:
+                    description = re.sub(pattern, '', description)
+                description = description.strip()
             
-            # Parse date
+            # Clean up description
+            description = re.sub(r'\s+', ' ', description).strip()
+            if description.startswith('-') or description.startswith('.'):
+                description = description[1:].strip()
+            
+            # Additional validation and debugging
+            if self.debug:
+                print(f"🔍 Parsed line: Date='{date_str}' -> '{date}'")
+                print(f"🔍 Amount: {transaction_amount} (Dr/Cr: {dr_cr_indicator})")
+                print(f"🔍 Balance: {balance}")
+                print(f"🔍 Description: '{description}'")
+                print(f"🔍 Original line: '{line}'")
+                print("---")
+            
+            # Validate parsed data
+            if not description or len(description) < 2:
+                if self.debug:
+                    print(f"⚠️ Skipping transaction - description too short: '{description}'")
+                return None
+            
+            # Parse date with more formats
             try:
                 if '-' in date_str:
-                    date_obj = datetime.strptime(date_str, '%d-%m-%Y')
+                    if len(date_str.split('-')[0]) == 4:  # YYYY-MM-DD
+                        date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+                    else:  # DD-MM-YYYY
+                        date_obj = datetime.strptime(date_str, '%d-%m-%Y')
                 elif '/' in date_str:
-                    date_obj = datetime.strptime(date_str, '%d/%m/%Y')
+                    if len(date_str.split('/')[0]) == 4:  # YYYY/MM/DD
+                        date_obj = datetime.strptime(date_str, '%Y/%m/%d')
+                    else:  # DD/MM/YYYY
+                        date_obj = datetime.strptime(date_str, '%d/%m/%Y')
                 else:
-                    date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+                    # Try common formats
+                    for fmt in ['%Y-%m-%d', '%d-%m-%Y', '%Y/%m/%d', '%d/%m/%Y']:
+                        try:
+                            date_obj = datetime.strptime(date_str, fmt)
+                            break
+                        except ValueError:
+                            continue
+                    else:
+                        date_obj = datetime.strptime(date_str, '%Y-%m-%d')  # Default
+                
                 date = date_obj.strftime('%Y-%m-%d')
             except ValueError:
                 date = date_str
             
-            # Assume last amount is balance, second-to-last is transaction amount
-            transaction_amount = amounts[-2] if len(amounts) >= 2 else amounts[0]
-            balance = amounts[-1]
-            
             return {
                 'date': date,
-                'description': description.strip(),
+                'description': description,
                 'ref': '',
                 'amount': transaction_amount,
                 'balance': balance,
                 'category': self._categorize_transaction(description, transaction_amount),
-                'parser_confidence': 'high'
+                'parser_confidence': 'high' if dr_cr_indicator else 'medium'
             }
             
         except Exception as e:
