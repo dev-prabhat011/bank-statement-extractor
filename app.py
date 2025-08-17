@@ -1,4 +1,4 @@
-# app.py (Updated with BuildError fix, Login Redirect fix, Pricing Route)
+# app.py (Updated with BuildError fix, Login Redirect fix, Pricing Route) 
 
 from flask import (Flask, render_template, request, send_from_directory,
                    redirect, url_for, flash, session, abort, jsonify, send_file) # Removed Blueprint as it wasn't used
