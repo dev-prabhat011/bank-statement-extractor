@@ -1,528 +1,86 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Dashboard{% endblock %}
+{% block title %}Admin Dashboard - Bank Statement Extractor{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
-            <div class="position-sticky pt-3">
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#dashboard" data-bs-toggle="tab">
-                            <i class="fas fa-tachometer-alt"></i>
-                            Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#banks" data-bs-toggle="tab">
-                            <i class="fas fa-university"></i>
-                            Bank Master
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#users" data-bs-toggle="tab">
-                            <i class="fas fa-users"></i>
-                            Users
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#subscriptions" data-bs-toggle="tab">
-                            <i class="fas fa-credit-card"></i>
-                            Subscriptions
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#extractions" data-bs-toggle="tab">
-                            <i class="fas fa-file-alt"></i>
-                            Extractions
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#settings" data-bs-toggle="tab">
-                            <i class="fas fa-cog"></i>
-                            Settings
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-
-        <!-- Main content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-            <div class="tab-content">
-                <!-- Dashboard Tab -->
-                <div class="tab-pane fade show active" id="dashboard">
-                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                        <h1 class="h2">Dashboard</h1>
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>Admin Dashboard</h1>
+        <p>Manage your bank statement extraction system</p>
                     </div>
 
-                    <!-- Statistics Cards -->
-                    <div class="row">
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="card border-left-primary shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                Total Users</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_users }}</div>
+    <div class="admin-stats">
+        <div class="stat-card">
+            <h3>Total Extractions</h3>
+            <div class="stat-number">{{ total_extractions|default(0) }}</div>
                                         </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-users fa-2x text-gray-300"></i>
+        <div class="stat-card">
+            <h3>Success Rate</h3>
+            <div class="stat-number">{{ success_rate|default(0) }}%</div>
                                         </div>
-                                    </div>
-                                </div>
+        <div class="stat-card">
+            <h3>Active Users</h3>
+            <div class="stat-number">{{ active_users|default(0) }}</div>
                             </div>
                         </div>
 
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="card border-left-success shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                                Active Subscriptions</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_subscriptions }}</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-credit-card fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="card border-left-info shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                                Total Extractions</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_extractions }}</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-file-alt fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="card border-left-warning shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                                Banks in Master</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_banks }}</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-university fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Recent Activities -->
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Recent Activities</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered" width="100%" cellspacing="0">
+    <div class="admin-sections">
+        <div class="admin-section">
+            <h2>Recent Extractions</h2>
+            <div class="table-container">
+                <table class="admin-table">
                                     <thead>
                                         <tr>
-                                            <th>Timestamp</th>
-                                            <th>User</th>
-                                            <th>Action</th>
-                                            <th>Details</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for activity in recent_activities %}
-                                        <tr>
-                                            <td>{{ activity.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                                            <td>{{ activity.user.name }}</td>
-                                            <td>{{ activity.action }}</td>
-                                            <td>{{ activity.details }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Banks Tab -->
-                <div class="tab-pane fade" id="banks">
-                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                        <h1 class="h2">Bank Master</h1>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBankModal">
-                            <i class="fas fa-plus"></i> Add Bank
-                        </button>
-                    </div>
-
-                    <div class="card shadow mb-4">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered" id="banksTable" width="100%" cellspacing="0">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Country</th>
+                            <th>Date</th>
+                            <th>Filename</th>
                                             <th>Status</th>
-                                            <th>Created At</th>
+                            <th>Processing Time</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for bank in banks %}
+                        {% for extraction in recent_extractions|default([]) %}
                                         <tr>
-                                            <td>{{ bank.name }}</td>
-                                            <td>{{ bank.country }}</td>
+                            <td>{{ extraction.date }}</td>
+                            <td>{{ extraction.filename }}</td>
                                             <td>
-                                                <span class="badge {% if bank.active %}bg-success{% else %}bg-danger{% endif %}">
-                                                    {{ 'Active' if bank.active else 'Inactive' }}
+                                <span class="status {{ extraction.status }}">
+                                    {{ extraction.status }}
                                                 </span>
                                             </td>
-                                            <td>{{ bank.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                                            <td>
-                                                <button class="btn btn-sm btn-primary edit-bank" data-bank-id="{{ bank.id }}">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-danger delete-bank" data-bank-id="{{ bank.id }}">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                            <td>{{ extraction.processing_time }}s</td>
+                            <td>
+                                <a href="#" class="btn btn-small">View</a>
                                             </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
+                    </div>
+                </div>
+
+        <div class="admin-section">
+            <h2>System Health</h2>
+            <div class="health-indicators">
+                <div class="health-item">
+                    <span class="health-label">Database:</span>
+                    <span class="health-status healthy">Healthy</span>
+                    </div>
+                <div class="health-item">
+                    <span class="health-label">File Storage:</span>
+                    <span class="health-status healthy">Healthy</span>
+                            </div>
+                <div class="health-item">
+                    <span class="health-label">Processing Queue:</span>
+                    <span class="health-status healthy">Healthy</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Users Tab -->
-                <div class="tab-pane fade" id="users">
-                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                        <h1 class="h2">Users</h1>
-                    </div>
-
-                    <div class="card shadow mb-4">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered" id="usersTable" width="100%" cellspacing="0">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Email</th>
-                                            <th>Role</th>
-                                            <th>Status</th>
-                                            <th>Last Login</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for user in users %}
-                                        <tr>
-                                            <td>{{ user.name }}</td>
-                                            <td>{{ user.email }}</td>
-                                            <td>{{ user.role }}</td>
-                                            <td>
-                                                <span class="badge {% if user.active %}bg-success{% else %}bg-danger{% endif %}">
-                                                    {{ 'Active' if user.active else 'Inactive' }}
-                                                </span>
-                                            </td>
-                                            <td>{{ user.last_login.strftime('%Y-%m-%d %H:%M:%S') if user.last_login else 'Never' }}</td>
-                                            <td>
-                                                <button class="btn btn-sm btn-primary edit-user" data-user-id="{{ user.id }}">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-danger delete-user" data-user-id="{{ user.id }}">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Subscriptions Tab -->
-                <div class="tab-pane fade" id="subscriptions">
-                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                        <h1 class="h2">Subscriptions</h1>
-                    </div>
-
-                    <div class="card shadow mb-4">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered" id="subscriptionsTable" width="100%" cellspacing="0">
-                                    <thead>
-                                        <tr>
-                                            <th>User</th>
-                                            <th>Plan</th>
-                                            <th>Start Date</th>
-                                            <th>End Date</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for subscription in subscriptions %}
-                                        <tr>
-                                            <td>{{ subscription.user.name }}</td>
-                                            <td>{{ subscription.plan }}</td>
-                                            <td>{{ subscription.start_date.strftime('%Y-%m-%d') }}</td>
-                                            <td>{{ subscription.end_date.strftime('%Y-%m-%d') }}</td>
-                                            <td>
-                                                <span class="badge {% if subscription.active %}bg-success{% else %}bg-danger{% endif %}">
-                                                    {{ 'Active' if subscription.active else 'Inactive' }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-sm btn-primary edit-subscription" data-subscription-id="{{ subscription.id }}">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-danger delete-subscription" data-subscription-id="{{ subscription.id }}">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Extractions Tab -->
-                <div class="tab-pane fade" id="extractions">
-                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                        <h1 class="h2">Extractions</h1>
-                    </div>
-
-                    <div class="card shadow mb-4">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered" id="extractionsTable" width="100%" cellspacing="0">
-                                    <thead>
-                                        <tr>
-                                            <th>User</th>
-                                            <th>Bank</th>
-                                            <th>File Name</th>
-                                            <th>Status</th>
-                                            <th>Timestamp</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for extraction in extractions %}
-                                        <tr>
-                                            <td>{{ extraction.user.name }}</td>
-                                            <td>{{ extraction.bank.name }}</td>
-                                            <td>{{ extraction.file_name }}</td>
-                                            <td>
-                                                <span class="badge {% if extraction.status == 'completed' %}bg-success{% elif extraction.status == 'failed' %}bg-danger{% else %}bg-warning{% endif %}">
-                                                    {{ extraction.status }}
-                                                </span>
-                                            </td>
-                                            <td>{{ extraction.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Settings Tab -->
-                <div class="tab-pane fade" id="settings">
-                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                        <h1 class="h2">Settings</h1>
-                    </div>
-
-                    <div class="card shadow mb-4">
-                        <div class="card-body">
-                            <form id="settingsForm">
-                                <div class="mb-3">
-                                    <label for="maxFileSize" class="form-label">Maximum File Size (MB)</label>
-                                    <input type="number" class="form-control" id="maxFileSize" name="maxFileSize" value="10">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="allowedFileTypes" class="form-label">Allowed File Types</label>
-                                    <input type="text" class="form-control" id="allowedFileTypes" name="allowedFileTypes" value="pdf">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="maxExtractionsPerDay" class="form-label">Maximum Extractions Per Day</label>
-                                    <input type="number" class="form-control" id="maxExtractionsPerDay" name="maxExtractionsPerDay" value="10">
-                                </div>
-                                <button type="submit" class="btn btn-primary">Save Settings</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-</div>
-
-<!-- Add Bank Modal -->
-<div class="modal fade" id="addBankModal" tabindex="-1" aria-labelledby="addBankModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addBankModalLabel">Add New Bank</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="addBankForm">
-                    <div class="mb-3">
-                        <label for="bankName" class="form-label">Bank Name</label>
-                        <input type="text" class="form-control" id="bankName" name="name" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="bankCountry" class="form-label">Country</label>
-                        <input type="text" class="form-control" id="bankCountry" name="country" required>
-                    </div>
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="bankActive" name="active" checked>
-                        <label class="form-check-label" for="bankActive">Active</label>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="saveBankBtn">Save Bank</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Edit Bank Modal -->
-<div class="modal fade" id="editBankModal" tabindex="-1" aria-labelledby="editBankModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editBankModalLabel">Edit Bank</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="editBankForm">
-                    <input type="hidden" id="editBankId">
-                    <div class="mb-3">
-                        <label for="editBankName" class="form-label">Bank Name</label>
-                        <input type="text" class="form-control" id="editBankName" name="name" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editBankCountry" class="form-label">Country</label>
-                        <input type="text" class="form-control" id="editBankCountry" name="country" required>
-                    </div>
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="editBankActive" name="active">
-                        <label class="form-check-label" for="editBankActive">Active</label>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="updateBankBtn">Update Bank</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Edit User Modal -->
-<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="editUserForm">
-                    <input type="hidden" id="editUserId">
-                    <div class="mb-3">
-                        <label for="editUserName" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="editUserName" name="name" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editUserEmail" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="editUserEmail" name="email" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editUserRole" class="form-label">Role</label>
-                        <select class="form-control" id="editUserRole" name="role" required>
-                            <option value="user">User</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                    </div>
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="editUserActive" name="active">
-                        <label class="form-check-label" for="editUserActive">Active</label>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="updateUserBtn">Update User</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Edit Subscription Modal -->
-<div class="modal fade" id="editSubscriptionModal" tabindex="-1" aria-labelledby="editSubscriptionModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editSubscriptionModalLabel">Edit Subscription</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="editSubscriptionForm">
-                    <input type="hidden" id="editSubscriptionId">
-                    <div class="mb-3">
-                        <label for="editSubscriptionPlan" class="form-label">Plan</label>
-                        <select class="form-control" id="editSubscriptionPlan" name="plan" required>
-                            <option value="basic">Basic</option>
-                            <option value="premium">Premium</option>
-                            <option value="enterprise">Enterprise</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editSubscriptionStartDate" class="form-label">Start Date</label>
-                        <input type="date" class="form-control" id="editSubscriptionStartDate" name="start_date" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editSubscriptionEndDate" class="form-label">End Date</label>
-                        <input type="date" class="form-control" id="editSubscriptionEndDate" name="end_date" required>
-                    </div>
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="editSubscriptionActive" name="active">
-                        <label class="form-check-label" for="editSubscriptionActive">Active</label>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="updateSubscriptionBtn">Update Subscription</button>
-            </div>
-        </div>
+    <div class="admin-actions">
+        <a href="{{ url_for('home') }}" class="btn btn-secondary">Back to Home</a>
+        <button class="btn btn-primary">Refresh Stats</button>
     </div>
 </div>
 {% endblock %}

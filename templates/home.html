@@ -1,29 +1,30 @@
 {% extends "base.html" %}
-{% block title %}Bank Statement Extractor - Smart Financial Analysis for Everyone{% endblock %}
+{% block title %}Bank Statement Analyser - Smart Financial Analysis for Everyone{% endblock %}
 
 {% block styles %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 <style>
-    .hero-gradient {
-        background: linear-gradient(135deg, #667eea 0%, #322f34 100%);
-        color: white;
-    }
+         .hero-gradient {
+         background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+         color: white;
+     }
+     
+     .hero-gradient.dark-theme {
+         background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+     }
     
-    .hero-gradient.dark-theme {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    }
-    
-    .feature-card {
-        background: white;
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        transition: all 0.3s ease;
-        border: 1px solid #f0f0f0;
-        height: 100%;
-        position: relative;
-        overflow: hidden;
-    }
+         .feature-card {
+         background: #1a1a2e;
+         border-radius: 16px;
+         padding: 2rem;
+         box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+         transition: all 0.3s ease;
+         border: 1px solid #2a2a3e;
+         height: 100%;
+         position: relative;
+         overflow: hidden;
+         color: #f8f9fa;
+     }
     
     .feature-card::before {
         content: '';
@@ -52,16 +53,17 @@
         margin-bottom: 1rem;
     }
     
-    .use-case-card {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 15px rgba(0,0,0,0.06);
-        border-left: 4px solid #667eea;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
+         .use-case-card {
+         background: #1a1a2e;
+         border-radius: 12px;
+         padding: 1.5rem;
+         box-shadow: 0 2px 15px rgba(0,0,0,0.3);
+         border-left: 4px solid #4a90e2;
+         transition: all 0.3s ease;
+         position: relative;
+         overflow: hidden;
+         color: #f8f9fa;
+     }
     
     .use-case-card::before {
         content: '';
@@ -81,16 +83,17 @@
         box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
     
-    .user-type-card {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-radius: 16px;
-        padding: 2rem;
-        text-align: center;
-        transition: all 0.3s ease;
-        border: 1px solid #dee2e6;
-        position: relative;
-        overflow: hidden;
-    }
+         .user-type-card {
+         background: linear-gradient(135deg, #1a1a2e 0%, #2a2a3e 100%);
+         border-radius: 16px;
+         padding: 2rem;
+         text-align: center;
+         transition: all 0.3s ease;
+         border: 1px solid #3a3a4e;
+         position: relative;
+         overflow: hidden;
+         color: #f8f9fa;
+     }
     
     .user-type-card::before {
         content: '';
@@ -119,16 +122,16 @@
         margin-bottom: 1rem;
     }
     
-    .stats-section {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .stats-section.dark-theme {
-        background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
-    }
+         .stats-section {
+         background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+         color: white;
+         position: relative;
+         overflow: hidden;
+     }
+     
+     .stats-section.dark-theme {
+         background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+     }
     
     .stat-card {
         text-align: center;
@@ -147,16 +150,16 @@
         background-clip: text;
     }
     
-    .cta-section {
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        color: white;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .cta-section.dark-theme {
-        background: linear-gradient(135deg, #1e4d2b 0%, #1a5f3a 100%);
-    }
+         .cta-section {
+         background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+         color: white;
+         position: relative;
+         overflow: hidden;
+     }
+     
+     .cta-section.dark-theme {
+         background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+     }
     
     .google-signin-btn {
         background: white;
@@ -188,13 +191,13 @@
         padding: 4rem 0;
     }
     
-    .section-heading {
-        text-align: center;
-        margin-bottom: 3rem;
-        font-weight: 700;
-        color: #2c3e50;
-        position: relative;
-    }
+         .section-heading {
+         text-align: center;
+         margin-bottom: 3rem;
+         font-weight: 700;
+         color: #f8f9fa;
+         position: relative;
+     }
     
     .hero-section {
         padding: 6rem 0 4rem 0;
@@ -233,14 +236,16 @@
         box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
     
-    .trust-badge {
-        background: white;
-        padding: 1rem 1.5rem;
-        border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        margin: 0.5rem;
-        transition: all 0.3s ease;
-    }
+         .trust-badge {
+         background: #1a1a2e;
+         padding: 1rem 1.5rem;
+         border-radius: 12px;
+         box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+         margin: 0.5rem;
+         transition: all 0.3s ease;
+         color: #f8f9fa;
+         border: 1px solid #2a2a3e;
+     }
     
     .trust-badge:hover {
         transform: translateY(-2px);
@@ -344,50 +349,136 @@
         color: #dc3545 !important;
     }
     
+    /* Developer cards styling */
+         .developer-card {
+         background: #1a1a2e;
+         border-radius: 16px;
+         padding: 2rem;
+         box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+         transition: all 0.3s ease;
+         border: 1px solid #2a2a3e;
+         height: 100%;
+         position: relative;
+         overflow: hidden;
+         color: #f8f9fa;
+     }
+    
+    .developer-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+    
+    .developer-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .developer-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+    
+    .dark-theme .developer-card {
+        background: #2c3034;
+        color: #f8f9fa;
+        border-color: #495057;
+    }
+    
+    /* Smooth scrolling */
+    html {
+        scroll-behavior: smooth;
+    }
+    
     /* Theme toggle button */
-    .theme-toggle {
-        position: fixed;
-        top: 100px;
-        right: 20px;
-        z-index: 1000;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        border: none;
-        color: white;
-        padding: 12px;
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
+         .theme-toggle {
+         position: fixed;
+         top: 100px;
+         right: 20px;
+         z-index: 1000;
+         background: linear-gradient(135deg, #0f0f23, #1a1a2e);
+         border: none;
+         color: white;
+         padding: 12px;
+         border-radius: 50%;
+         width: 50px;
+         height: 50px;
+         box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+         transition: all 0.3s ease;
+         cursor: pointer;
+     }
+     
+     .theme-toggle:hover {
+         transform: scale(1.1);
+         box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+     }
+     
+     .theme-toggle.dark-theme {
+         background: linear-gradient(135deg, #0f0f23, #1a1a2e);
+     }
     
-    .theme-toggle:hover {
-        transform: scale(1.1);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-    }
-    
-    .theme-toggle.dark-theme {
-        background: linear-gradient(135deg, #1a1a2e, #16213e);
-    }
-    
-    @media (max-width: 768px) {
-        .theme-toggle {
-            top: 80px;
-            right: 15px;
-            width: 45px;
-            height: 45px;
-        }
-    }
+         @media (max-width: 768px) {
+         .theme-toggle {
+             top: 80px;
+             right: 15px;
+             width: 45px;
+             height: 45px;
+         }
+     }
+     
+     /* Ensure buttons are clickable */
+     .btn {
+         cursor: pointer !important;
+         position: relative;
+         z-index: 10;
+     }
+     
+     .btn:hover {
+         transform: translateY(-2px);
+         box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+     }
+     
+     /* Debug styles */
+     .btn:active {
+         transform: translateY(0);
+     }
+     
+     /* Dark theme body styling */
+     body {
+         background-color: #0f0f23;
+         color: #f8f9fa;
+     }
+     
+     /* Dark theme section backgrounds */
+     .bg-light {
+         background-color: #0f0f23 !important;
+     }
+     
+     /* Dark theme text colors */
+     .text-muted {
+         color: #adb5bd !important;
+     }
+     
+     /* Dark theme card borders */
+     .card {
+         background-color: #1a1a2e;
+         border-color: #2a2a3e;
+         color: #f8f9fa;
+     }
 </style>
 {% endblock %}
 
 {% block content %}
 <main>
     <!-- Theme Toggle Button -->
-    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <i class="bi bi-palette-fill"></i>
-    </button>
+         <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+         <i class="bi bi-sun-fill"></i>
+     </button>
 
     <!-- Hero Section -->
     <section class="hero-section hero-gradient" id="heroSection">
@@ -406,9 +497,9 @@
                                 <i class="bi bi-rocket-takeoff me-2"></i>Start Extracting Now
                             </a>
                         {% endif %}
-                        <a href="#features" class="btn btn-outline-light btn-lg px-5 py-3">
+                        <button type="button" class="btn btn-outline-light btn-lg px-5 py-3" id="learnMoreBtn" style="cursor: pointer; z-index: 10;">
                             <i class="bi bi-info-circle me-2"></i>Learn More
-                        </a>
+                        </button>
                     </div>
                 </div>
                 <div class="col-lg-6 text-center">
@@ -803,6 +894,62 @@
             {% endif %}
         </div>
     </section>
+
+    <!-- Developer & Support Section -->
+    <section class="section-padding bg-light" id="developerSection">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-4 mb-4">
+                    <div class="developer-card">
+                        <i class="bi bi-person-badge display-4 text-primary mb-3"></i>
+                        <h5 class="fw-bold">Developer</h5>
+                        <p class="text-muted mb-3">Built with passion for financial technology by Prabhat Jha</p>
+                        <a href="https://www.linkedin.com/in/jha-prabhat/" target="_blank" class="btn btn-outline-primary">
+                            <i class="bi bi-linkedin me-2"></i>Connect on LinkedIn
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="developer-card">
+                        <i class="bi bi-heart-fill display-4 text-danger mb-3"></i>
+                        <h5 class="fw-bold">Support Us</h5>
+                        <p class="text-muted mb-3">Help us keep this tool free and improve it further</p>
+                        <a href="#" class="btn btn-outline-success">
+                            <i class="bi bi-cup-hot me-2"></i>Buy us a Coffee
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="developer-card">
+                        <i class="bi bi-github display-4 text-dark mb-3"></i>
+                        <h5 class="fw-bold">Open Source</h5>
+                        <p class="text-muted mb-3">Contribute to the project on GitHub</p>
+                        <a href="https://github.com/dev-prabhat011/bank-statement-extractor" target="_blank" class="btn btn-outline-dark">
+                            <i class="bi bi-github me-2"></i>View on GitHub
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer class="py-4 bg-dark text-white text-center">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <p class="mb-2">&copy; 2024 Bank Statement Analyser. All rights reserved.</p>
+                    <p class="mb-0">
+                        <small class="text-muted">
+                            Built with ❤️ by Prabhat Jha | 
+                            <a href="#" class="text-light text-decoration-none">Privacy Policy</a> | 
+                            <a href="#" class="text-light text-decoration-none">Terms of Service</a>
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
 </main>
 
 <!-- Theme Toggle Script -->
@@ -817,16 +964,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const howItWorksSection = document.getElementById('howItWorksSection');
     const trustSection = document.getElementById('trustSection');
     const ctaSection = document.getElementById('ctaSection');
+    const developerSection = document.getElementById('developerSection');
     
-    // Check for saved theme preference or default to light
-    const currentTheme = localStorage.getItem('landingTheme') || 'light';
-    applyTheme(currentTheme);
+         // Check for saved theme preference or default to dark
+     const currentTheme = localStorage.getItem('landingTheme') || 'dark';
+     applyTheme(currentTheme);
     
-    themeToggle.addEventListener('click', function() {
-        const currentTheme = document.body.classList.contains('dark-theme') ? 'light' : 'dark';
-        applyTheme(currentTheme);
-        localStorage.setItem('landingTheme', currentTheme);
-    });
+         themeToggle.addEventListener('click', function() {
+         const currentTheme = document.body.classList.contains('dark-theme') ? 'light' : 'dark';
+         applyTheme(currentTheme);
+         localStorage.setItem('landingTheme', currentTheme);
+     });
+     
+     // Apply dark theme by default
+     document.body.classList.add('dark-theme');
     
     function applyTheme(theme) {
         if (theme === 'dark') {
@@ -839,6 +990,7 @@ document.addEventListener('DOMContentLoaded', function() {
             howItWorksSection.classList.add('dark-theme');
             trustSection.classList.add('dark-theme');
             ctaSection.classList.add('dark-theme');
+            developerSection.classList.add('dark-theme');
             themeToggle.classList.add('dark-theme');
             themeToggle.innerHTML = '<i class="bi bi-sun-fill"></i>';
         } else {
@@ -851,6 +1003,7 @@ document.addEventListener('DOMContentLoaded', function() {
             howItWorksSection.classList.remove('dark-theme');
             trustSection.classList.remove('dark-theme');
             ctaSection.classList.remove('dark-theme');
+            developerSection.classList.remove('dark-theme');
             themeToggle.classList.remove('dark-theme');
             themeToggle.innerHTML = '<i class="bi bi-palette-fill"></i>';
         }
@@ -873,6 +1026,44 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
+    
+    // Smooth scrolling function
+    function scrollToSection(sectionId) {
+        console.log('scrollToSection called with:', sectionId);
+        const section = document.getElementById(sectionId);
+        if (section) {
+            section.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        } else {
+            console.error('Section not found:', sectionId);
+        }
+    }
+    
+    // Make functions globally available
+    window.scrollToSection = scrollToSection;
+    
+    // Add event listeners for buttons
+    const learnMoreBtn = document.getElementById('learnMoreBtn');
+    
+    if (learnMoreBtn) {
+        learnMoreBtn.addEventListener('click', () => {
+            console.log('Learn More button clicked');
+            scrollToSection('features');
+        });
+        console.log('Learn More button event listener added');
+    } else {
+        console.error('Learn More button not found');
+    }
+    
+    // Test button functionality
+    console.log('Home page JavaScript loaded successfully');
+    console.log('scrollToSection function available:', typeof window.scrollToSection);
+    
+    // Additional debugging
+    console.log('All buttons on page:', document.querySelectorAll('button').length);
+    console.log('Learn More button:', learnMoreBtn);
 });
 </script>
 {% endblock %}

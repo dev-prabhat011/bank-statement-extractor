@@ -402,9 +402,26 @@ def favicon():
 
 @app.route('/')
 def home_page():
-    """Renders the home page."""
-    logger.debug("Rendering home page")
+    """Renders the home landing page."""
+    logger.debug("Rendering home landing page")
     return render_template('home.html')
+
+@app.route('/test')
+def test_page():
+    """Test route to verify template inheritance."""
+    return render_template('test.html')
+
+@app.route('/simple_test')
+def simple_test_page():
+    """Simple test route to verify template processing."""
+    return render_template('simple_test.html', test_var='Hello from Flask!')
+
+@app.route('/home_new')
+def home_new_page():
+    """Test route for the new home template."""
+    return render_template('home_new.html')
+
+
 
 @app.route('/index')
 @login_required
@@ -558,7 +575,7 @@ def login():
     if current_user.is_authenticated:
         if current_user.is_admin:
             return redirect(url_for('admin_dashboard'))
-        return redirect(url_for('index'))
+        return redirect(url_for('analyzer'))
 
     if request.method == 'POST':
         email = request.form.get('email')
@@ -689,7 +706,7 @@ def upload_file():
 
         if not start_date or not end_date:
             flash('Start Date and End Date are required.')
-            return redirect(url_for('index')) # Redirect back to extractor page
+            return redirect(url_for('analyzer')) # Redirect back to extractor page
 
         output_formats = []
         if output_excel: output_formats.append('excel')
@@ -769,7 +786,7 @@ def upload_file():
                   return redirect(url_for('password_page'))
              else:
                   # Redirect to extractor page on other value errors
-                  return redirect(url_for('index')) # <<< FIXED: Redirect to extractor page
+                  return redirect(url_for('analyzer')) # <<< FIXED: Redirect to extractor page
 
         except Exception as e:
              logger.error(f"Caught unexpected exception during upload processing for file {filename}", exc_info=True)
@@ -778,10 +795,10 @@ def upload_file():
                  except OSError as e_os: logger.error(f"Error removing file {file_path} after Exception: {e_os}")
              flash(f'An unexpected error occurred during processing. Please check logs or try again.')
              # Redirect to extractor page on unexpected errors
-             return redirect(url_for('index')) # <<< FIXED: Redirect to extractor page
+             return redirect(url_for('analyzer')) # <<< FIXED: Redirect to extractor page
     else:
         flash('Invalid file type. Only PDF files are allowed.')
-        return redirect(url_for('index')) # Redirect back to extractor page
+        return redirect(url_for('analyzer')) # Redirect back to extractor page
 
 
 @app.route('/password', methods=['GET', 'POST'])
@@ -795,7 +812,7 @@ def password_page():
 
     if not file_path or not start_date or not end_date:
         flash('Session expired or invalid state. Please re-upload the file.')
-        return redirect(url_for('index')) # Go back to extractor page
+        return redirect(url_for('analyzer')) # Go back to extractor page
 
     if request.method == 'POST':
         password = request.form.get('password', '')
@@ -872,7 +889,7 @@ def password_page():
             else:
                 flash(f"Processing Error: {ve}")
                  # Redirect to extractor page on other value errors
-                return redirect(url_for('index')) # <<< FIXED: Redirect to extractor page
+                return redirect(url_for('analyzer')) # <<< FIXED: Redirect to extractor page
 
         except Exception as e:
             logger.error(f"Caught unexpected exception during password processing for file {file_path}", exc_info=True)
@@ -882,7 +899,7 @@ def password_page():
             session.pop('end_date', None)
             session.pop('output_formats', None)
             # Redirect to extractor page on unexpected errors
-            return redirect(url_for('index')) # <<< FIXED: Redirect to extractor page
+            return redirect(url_for('analyzer')) # <<< FIXED: Redirect to extractor page
 
     # GET request
     return render_template('password.html')
@@ -1052,7 +1069,7 @@ def request_entity_too_large(error):
     """Handles file uploads exceeding the size limit."""
     flash('File too large! Maximum file size is 16MB.')
      # Redirect to extractor page if file is too large for upload attempt
-    return redirect(url_for('index')), 413 # <<< FIXED: Redirect to extractor page
+    return redirect(url_for('analyzer')), 413 # <<< FIXED: Redirect to extractor page
 
 @app.route('/clear_session')
 def clear_session():

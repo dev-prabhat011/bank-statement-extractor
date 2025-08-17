@@ -598,10 +598,11 @@ class BankStatementExtractor:
             'available_balance': r'Available\s?Balance:?\s*[$€£]?\s*[$€£]?\s*([\d,.-]+)', 
             # Account/Owner Details
             'account_name': r'Account\s?(?:Name|Holder):\s*([A-Za-z0-9\s\.\-\'&]+)', 
-            'owner_name': r'^(?:Mr\.?|Mrs\.?|Ms\.?|Dr\.?)\s*[A-Za-z\s.\-\']+\s*$', 
+            'owner_name': r'^(?:Mr\.?|Mrs\.?|Ms\.?|Dr\.?)\s*([A-Za-z\s.\-\']+)\s*$', 
             'customer_name': r'(?:Customer|Prepared\s+for):\s*([A-Za-z0-9\s\.\-\'&]+)', 
             'account_type': r'Account\s?Type:?\s*([A-Za-z\s]+(?:Account)?)', 
             # Bank/Branch Details
+            'bank_name': r'(KOTAK\s+MAHINDRA\s+BANK|HDFC\s+BANK|ICICI\s+BANK|STATE\s+BANK\s+OF\s+INDIA|SBI|AXIS\s+BANK|YES\s+BANK|IDFC\s+BANK|BANDHAN\s+BANK|RBL\s+BANK|FEDERAL\s+BANK|SOUTH\s+INDIAN\s+BANK|KARNATAKA\s+BANK|CANARA\s+BANK|PUNJAB\s+NATIONAL\s+BANK|BANK\s+OF\s+BARODA|UNION\s+BANK|BANK\s+OF\s+INDIA|CENTRAL\s+BANK|INDIAN\s+BANK|UCO\s+BANK|PUNJAB\s+& SIND\s+BANK|BANK\s+OF\s+MAHARASHTRA|ANDHRA\s+BANK|VIJAYA\s+BANK|CORPORATION\s+BANK|SYNDICATE\s+BANK|ORIENTAL\s+BANK|UNITED\s+BANK|ALLAHABAD\s+BANK|DENA\s+BANK)',
             'branch_code': r'Branch\s?(?:Code|No\.?):\s*([A-Z0-9-]+)', 
             'routing_number': r'(?:Routing|ABA)\s?(?:Number|#|No\.?):\s*([0-9]{9})', 
             'swift_code': r'SWIFT\s?(?:Code|BIC):\s*([A-Z0-9]{8,11})', 
@@ -616,13 +617,21 @@ class BankStatementExtractor:
 
         for key, pattern in other_patterns.items():
              # Only search if not already found (avoid overwriting good matches)
-             if key not in self.account_info:
+             # Special handling for bank_name: don't override user's selection
+             if key not in self.account_info or (key == 'bank_name' and not self.account_info.get('bank_name')):
                 try:
                     match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
                     if match:
                         value = match.group(1).strip().replace('\n', ' ')
                         if 'balance' in key: 
                             value = self._clean_balance_string(value) 
+                        
+                        # CRITICAL FIX: Never override user's bank name selection
+                        if key == 'bank_name' and self.account_info.get('bank_name'):
+                            if self.debug:
+                                logger.info(f"Skipping bank_name extraction - user already selected: {self.account_info['bank_name']}")
+                            continue
+                        
                         self.account_info[key] = value
                         if self.debug:
                             logger.info(f"Found {key}: {value}") 
@@ -659,14 +668,78 @@ class BankStatementExtractor:
         # Store extraction ID
         self.account_info['extraction_id'] = self.unique_id 
 
+        # Fallback bank name extraction if not found by regex
+        # Only auto-detect if user hasn't provided a bank name
+        if 'bank_name' not in self.account_info or not self.account_info['bank_name']:
+            extracted_bank = self._extract_bank_name_fallback(text)
+            if extracted_bank:
+                self.account_info['bank_name'] = extracted_bank
+                if self.debug:
+                    logger.info(f"Extracted bank name via fallback: {extracted_bank}")
+        else:
+            if self.debug:
+                logger.info(f"Using user-provided bank name: {self.account_info['bank_name']}")
+
         # Log missing essential fields 
         essential_fields = ['account_number', 'owner_name', 'bank_name', 'statement_period'] 
         for field in essential_fields:
             if not self.account_info.get(field) and self.debug: # Use .get() for safety
-                logger.warning(f"Essential field '{field}' could not be extracted.") 
+                logger.warning(f"Essential field '{field}' could not be extracted.")
     # ============================================================
     # ========= UPDATED extract_account_info Method End ==========
     # ============================================================
+
+    def _extract_bank_name_fallback(self, text: str) -> Optional[str]:
+        """Fallback method to extract bank name from text content."""
+        text_lower = text.lower()
+        
+        # Common bank name patterns
+        bank_patterns = {
+            'KOTAK MAHINDRA BANK': ['kotak mahindra bank', 'kmbl', 'kotak.com', 'kotak bank'],
+            'HDFC BANK': ['hdfc bank', 'hdfc.com', 'hdfc'],
+            'ICICI BANK': ['icici bank', 'icici.com', 'icici'],
+            'STATE BANK OF INDIA': ['state bank of india', 'sbi', 'sbi.co.in'],
+            'AXIS BANK': ['axis bank', 'axis.com', 'axis'],
+            'YES BANK': ['yes bank', 'yesbank.in', 'yes'],
+            'IDFC BANK': ['idfc bank', 'idfc.com', 'idfc'],
+            'BANDHAN BANK': ['bandhan bank', 'bandhanbank.com', 'bandhan'],
+            'RBL BANK': ['rbl bank', 'rblbank.com', 'rbl'],
+            'FEDERAL BANK': ['federal bank', 'federalbank.co.in', 'federal'],
+            'SOUTH INDIAN BANK': ['south indian bank', 'southindianbank.com', 'south indian'],
+            'KARNATAKA BANK': ['karnataka bank', 'karnatakabank.com', 'karnataka'],
+            'CANARA BANK': ['canara bank', 'canarabank.com', 'canara'],
+            'PUNJAB NATIONAL BANK': ['punjab national bank', 'pnb.co.in', 'pnb'],
+            'BANK OF BARODA': ['bank of baroda', 'bankofbaroda.com', 'bob'],
+            'UNION BANK': ['union bank', 'unionbankofindia.co.in', 'union'],
+            'BANK OF INDIA': ['bank of india', 'bankofindia.com', 'boi'],
+            'CENTRAL BANK': ['central bank', 'centralbank.co.in', 'central'],
+            'INDIAN BANK': ['indian bank', 'indianbank.co.in', 'indian'],
+            'UCO BANK': ['uco bank', 'ucobank.com', 'uco'],
+            'PUNJAB & SIND BANK': ['punjab & sind bank', 'psbindia.com', 'psb'],
+            'BANK OF MAHARASHTRA': ['bank of maharashtra', 'bankofmaharashtra.in', 'bom'],
+            'ANDHRA BANK': ['andhra bank', 'andhrabank.in', 'andhra'],
+            'VIJAYA BANK': ['vijaya bank', 'vijayabank.com', 'vijaya'],
+            'CORPORATION BANK': ['corporation bank', 'corporationbank.com', 'corporation'],
+            'SYNDICATE BANK': ['syndicate bank', 'syndicatebank.in', 'syndicate'],
+            'ORIENTAL BANK': ['oriental bank', 'obcindia.co.in', 'obc'],
+            'UNITED BANK': ['united bank', 'unitedbankofindia.com', 'united'],
+            'ALLAHABAD BANK': ['allahabad bank', 'allahabadbank.in', 'allahabad'],
+            'DENA BANK': ['dena bank', 'denabank.com', 'dena']
+        }
+        
+        # Search for bank names in text
+        for bank_name, patterns in bank_patterns.items():
+            for pattern in patterns:
+                if pattern in text_lower:
+                    return bank_name
+        
+        # If no exact match, try to find partial matches
+        for bank_name, patterns in bank_patterns.items():
+            for pattern in patterns:
+                if any(word in text_lower for word in pattern.split()):
+                    return bank_name
+        
+        return None
 
     def _clean_balance_string(self, balance_str):
         """Removes currency symbols, thousand separators, and handles negative formats.""" 
@@ -753,6 +826,8 @@ class BankStatementExtractor:
                 'balance': balance
             })
         return transactions
+
+
 
     def _parse_hdfc_separate_cols(self, df):
         transactions = []

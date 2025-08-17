@@ -6,6 +6,7 @@ for analysis, export, and other functionality.
 from typing import Tuple, List, Dict, Any, Optional
 from . import analysis, exporters
 from .parsers.router import parse_with_smart_router
+from extractor.unified_parser import parse_statement_layout_aware
 
 
 class StatementExtractor:
@@ -29,6 +30,9 @@ class StatementExtractor:
             debug=debug,
             bank_name=bank_name
         )
+        
+        # Store bank name for easy access
+        self.bank_name = bank_name
         
         # Store debug flag for enhanced parsing
         self._debug = debug
@@ -63,8 +67,25 @@ class StatementExtractor:
                 ]
                 print(f"💰 High value transactions: {len(self._impl.high_value_transactions)}")
                 
-                # Extract account info using the extracted text
+                # CRITICAL FIX: Set bank name BEFORE calling extract_account_info to prevent override
+                if self.bank_name:
+                    self._impl.account_info['bank_name'] = self.bank_name
+                    print(f"🏦 Setting user-selected bank name: {self.bank_name}")
+                
+                # Extract account info using the extracted text (but bank_name is already set)
                 self._impl.extract_account_info(raw_text)
+                
+                # Ensure bank name is preserved from user selection
+                if hasattr(self, '_impl') and hasattr(self._impl, 'account_info'):
+                    if self.bank_name:
+                        # Force the user's bank selection to take priority
+                        self._impl.account_info['bank_name'] = self.bank_name
+                        print(f"🏦 Confirmed user-selected bank name: {self.bank_name}")
+                    elif self._impl.account_info.get('bank_name'):
+                        print(f"🏦 Using extracted bank name: {self._impl.account_info['bank_name']}")
+                    else:
+                        print("⚠️ No bank name found - using generic")
+                        self._impl.account_info['bank_name'] = 'GENERIC BANK'
                 
                 # Use modular analysis for enhanced functionality
                 analysis.perform_full_analysis(self._impl)
@@ -88,9 +109,26 @@ class StatementExtractor:
                 logger.warning(f"Enhanced extraction failed, falling back to legacy: {e}")
             # Fall back to legacy method
         
+        # CRITICAL FIX: Set bank name BEFORE calling legacy extract_all to prevent override
+        if self.bank_name:
+            self._impl.account_info['bank_name'] = self.bank_name
+            print(f"🏦 Legacy mode: Setting user-selected bank name: {self.bank_name}")
+        
         # Use the legacy class for core extraction
         print("🔧 Using Legacy Parser...")
         transactions, account_info, analysis_results = self._impl.extract_all()
+        
+        # Ensure bank name is preserved in legacy mode too
+        if hasattr(self, '_impl') and hasattr(self._impl, 'account_info'):
+            if self.bank_name:
+                # Force the user's bank selection to take priority
+                self._impl.account_info['bank_name'] = self.bank_name
+                print(f"🏦 Legacy mode: Confirmed user-selected bank name: {self.bank_name}")
+            elif self._impl.account_info.get('bank_name'):
+                print(f"🏦 Legacy mode: Using extracted bank name: {self._impl.account_info['bank_name']}")
+            else:
+                print("⚠️ Legacy mode: No bank name found - using generic")
+                self._impl.account_info['bank_name'] = 'GENERIC BANK'
         
         # Use modular analysis for enhanced functionality
         analysis.perform_full_analysis(self._impl)
@@ -98,75 +136,36 @@ class StatementExtractor:
         return self._impl.transactions, self._impl.account_info, self._impl.analysis_results
 
     def extract_transactions_enhanced(self) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
-        """
-        Enhanced transaction extraction using the new unified parsing system.
-        
-        Returns:
-            Tuple of (transactions, parsing_info)
-        """
+        """Extract transactions using the enhanced layout-aware parser."""
         try:
-            from .unified_parser import UnifiedStatementParser
+            # Get the already extracted text from the implementation
+            raw_text = self._impl.extract_text()
+            if not raw_text:
+                print("❌ No text available for enhanced parsing")
+                return [], {}
             
-            if self._debug:
-                print("🚀 Using Unified Parser System...")
+            print(f"🔍 Using Layout-Aware Parser with {len(raw_text)} characters of text...")
             
-            # Create unified parser with same settings
-            unified_parser = UnifiedStatementParser(
+            # Use the new layout-aware parser with user's bank selection
+            transactions, parsing_info = parse_statement_layout_aware(
+                raw_text=raw_text,
                 pdf_path=self._impl.pdf_path,
-                password=getattr(self._impl, 'password', None),
-                debug=self._debug
+                password=self._impl.password,
+                debug=True,
+                user_selected_bank=self.bank_name  # Pass user's bank selection
             )
             
-            # Parse using unified system
-            transactions, parsing_info = unified_parser.parse_statement()
-            
-            if self._debug:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.info(f"Unified parser extracted {len(transactions)} transactions")
-                logger.info(f"Methods tried: {parsing_info.get('total_methods_tried', 0)}")
-                logger.info(f"Successful methods: {parsing_info.get('successful_methods', [])}")
-                logger.info(f"Bank detected: {parsing_info.get('bank_detected', 'unknown')}")
-                logger.info(f"Confidence score: {parsing_info.get('confidence_score', 0.0):.2f}")
-            
-            # If unified parser fails, try legacy Kotak parser as fallback
-            if not transactions and parsing_info.get('bank_detected') == 'kotak':
-                if self._debug:
-                    print("🔄 Unified parser failed for Kotak, trying legacy parser...")
-                
-                try:
-                    from .parsers.kotak import parse_kotak_single_col
-                    import pandas as pd
-                    
-                    # Try to extract tables with tabula
-                    import tabula
-                    tables = tabula.read_pdf(self._impl.pdf_path, pages='all', multiple_tables=True)
-                    
-                    for table in tables:
-                        if table is not None and not table.empty:
-                            legacy_transactions = parse_kotak_single_col(table, debug=self._debug)
-                            if legacy_transactions:
-                                if self._debug:
-                                    print(f"✅ Legacy parser found {len(legacy_transactions)} transactions")
-                                transactions = legacy_transactions
-                                parsing_info['fallback_method'] = 'legacy_kotak_parser'
-                                break
-                    
-                except Exception as e:
-                    if self._debug:
-                        print(f"⚠️ Legacy parser fallback failed: {e}")
+            print(f"✅ Layout-Aware Parser Results:")
+            print(f"   Layout detected: {parsing_info.get('layout_name', 'Unknown')}")
+            print(f"   Parser used: {parsing_info.get('parser_used', 'Unknown')}")
+            print(f"   Transactions found: {parsing_info.get('transactions_found', 0)}")
+            print(f"   Confidence score: {parsing_info.get('confidence_score', 0.0):.2f}")
             
             return transactions, parsing_info
-                
-        except Exception as e:
-            if self._debug:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.error(f"Unified parser failed: {e}")
             
-            # Fallback to legacy method if unified parser fails
-            print("⚠️ Unified parser failed, falling back to legacy method...")
-            return self._extract_transactions_legacy_fallback()
+        except Exception as e:
+            print(f"❌ Enhanced extraction failed: {e}")
+            return [], {'error': str(e)}
     
     def _extract_transactions_legacy_fallback(self) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
         """
@@ -522,7 +521,13 @@ class StatementExtractor:
             return None
 
     def _detect_bank(self) -> str:
-        """Detect bank from first page text."""
+        """Detect bank from first page text or use user's selection."""
+        # If user has selected a bank, use that instead of auto-detecting
+        if self.bank_name:
+            print(f"🏦 Using user-selected bank: {self.bank_name}")
+            return self.bank_name.upper()
+        
+        # Otherwise, auto-detect from PDF content
         try:
             first_page_text = self._extract_first_page_text_enhanced().lower()
             if 'kotak' in first_page_text:
