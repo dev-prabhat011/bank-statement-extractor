@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Test - Bank Statement Extractor{% endblock %}
+
+{% block content %}
+<div class="test-container">
+    <h1>Test Page</h1>
+    <p>This is a test page for development purposes.</p>
+    
+    <div class="test-section">
+        <h2>Test Upload Form</h2>
+        <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="file">Select PDF File:</label>
+                <input type="file" id="file" name="file" accept=".pdf" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password (if encrypted):</label>
+                <input type="password" id="password" name="password" placeholder="Leave blank if not encrypted">
+            </div>
+            
+            <div class="form-group">
+                <label for="start_date">Start Date:</label>
+                <input type="date" id="start_date" name="start_date" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="end_date">End Date:</label>
+                <input type="date" id="end_date" name="end_date" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Test Extraction</button>
+        </form>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Links</h2>
+        <a href="{{ url_for('home') }}" class="btn btn-secondary">Home</a>
+        <a href="{{ url_for('pricing') }}" class="btn btn-secondary">Pricing</a>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Admin</a>
+    </div>
+</div>
+{% endblock %}

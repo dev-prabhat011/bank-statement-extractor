@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}New Home - Bank Statement Extractor{% endblock %}
+
+{% block content %}
+<div class="new-home-container">
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Advanced Bank Statement Extraction</h1>
+            <p class="hero-subtitle">Powered by AI to extract every transaction detail for fraud detection and analysis</p>
+            <div class="hero-buttons">
+                <a href="#upload-section" class="btn btn-primary">Start Extraction</a>
+                <a href="{{ url_for('pricing') }}" class="btn btn-secondary">View Plans</a>
+            </div>
+        </div>
+    </div>
+
+    <section id="upload-section" class="upload-section">
+        <div class="container">
+            <h2>Upload Your Bank Statement</h2>
+            <div class="upload-form">
+                <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="file">Select PDF File:</label>
+                        <input type="file" id="file" name="file" accept=".pdf" required>
+                        <small>Supports encrypted and non-encrypted PDFs</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password (if encrypted):</label>
+                        <input type="password" id="password" name="password" placeholder="Leave blank if not encrypted">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="start_date">Start Date:</label>
+                        <input type="date" id="start_date" name="start_date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="end_date">End Date:</label>
+                        <input type="date" id="end_date" name="end_date" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Extract Statement</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section class="features-section">
+        <div class="container">
+            <h2>Advanced Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Fraud Detection Ready</h3>
+                    <p>Captures every transaction including 1 rupee amounts for comprehensive analysis</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-link"></i>
+                    <h3>Multi-line Support</h3>
+                    <p>Intelligently combines transaction descriptions spanning multiple lines</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-brain"></i>
+                    <h3>AI Powered</h3>
+                    <p>Automatically detects statement layout and applies optimal parsing strategy</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-download"></i>
+                    <h3>Multiple Formats</h3>
+                    <p>Export to Excel and XML formats for different use cases</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="supported-banks">
+        <div class="container">
+            <h2>Supported Banks</h2>
+            <div class="banks-grid">
+                <div class="bank-item">
+                    <i class="fas fa-university"></i>
+                    <span>Kotak Mahindra Bank</span>
+                </div>
+                <div class="bank-item">
+                    <i class="fas fa-university"></i>
+                    <span>HDFC Bank</span>
+                </div>
+                <div class="bank-item">
+                    <i class="fas fa-university"></i>
+                    <span>ICICI Bank</span>
+                </div>
+                <div class="bank-item">
+                    <i class="fas fa-university"></i>
+                    <span>State Bank of India</span>
+                </div>
+                <div class="bank-item">
+                    <i class="fas fa-university"></i>
+                    <span>Other Banks</span>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

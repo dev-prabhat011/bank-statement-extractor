@@ -2459,4 +2459,3 @@ def parse_statement_layout_aware(raw_text: str, pdf_path: str = "", password: Op
     parser = LayoutAwareParser(pdf_path, password, debug, user_selected_bank)
     return parser.parse_statement(raw_text)
 
-

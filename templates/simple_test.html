@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Simple Test - Bank Statement Extractor{% endblock %}
+
+{% block content %}
+<div class="simple-test-container">
+    <h1>Simple Test Page</h1>
+    <p>This is a simple test page to verify template functionality.</p>
+    
+    <div class="test-variable">
+        <h2>Test Variable:</h2>
+        <p>{{ test_var }}</p>
+    </div>
+    
+    <div class="navigation-links">
+        <h2>Navigation:</h2>
+        <a href="{{ url_for('home') }}" class="btn btn-primary">Go Home</a>
+        <a href="{{ url_for('test') }}" class="btn btn-secondary">Go to Test</a>
+    </div>
+</div>
+{% endblock %}
