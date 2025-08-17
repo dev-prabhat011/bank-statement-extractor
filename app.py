@@ -1137,7 +1137,7 @@ def add_user():
     
     # Create new user
     new_user = User(
-        id=str(uuid.uuid4()),
+        id_=str(uuid.uuid4()),
         name=name,
         email=email,
         password=hashed_password,
@@ -1151,7 +1151,7 @@ def add_user():
     
     # Log activity
     activity = Activity(
-        id=str(uuid.uuid4()),
+        id_=str(uuid.uuid4()),
         user_id=current_user.id,
         action='add_user',
         details=f'Added new user: {email}'
@@ -1183,7 +1183,7 @@ def add_bank():
     
     # Create new bank
     new_bank = Bank(
-        id=str(uuid.uuid4()),
+        id_=str(uuid.uuid4()),
         user_id=user_id,
         bank_name=bank_name,
         account_number=account_number,
@@ -1195,7 +1195,7 @@ def add_bank():
     
     # Log activity
     activity = Activity(
-        id=str(uuid.uuid4()),
+        id_=str(uuid.uuid4()),
         user_id=current_user.id,
         action='add_bank',
         details=f'Added new bank: {bank_name} for user: {user.email}'
@@ -1234,11 +1234,10 @@ def add_subscription():
     
     # Create new subscription
     new_subscription = Subscription(
-        id=str(uuid.uuid4()),
+        id_=str(uuid.uuid4()),
         user_id=user_id,
         plan=plan,
         status='active',
-        start_date=start_date,
         end_date=end_date
     )
     
@@ -1247,7 +1246,7 @@ def add_subscription():
     
     # Log activity
     activity = Activity(
-        id=str(uuid.uuid4()),
+        id_=str(uuid.uuid4()),
         user_id=current_user.id,
         action='add_subscription',
         details=f'Added new subscription: {plan} for user: {user.email}'
@@ -1272,7 +1271,7 @@ def manage_bank(bank_id):
         
         # Log activity
         activity = Activity(
-            id=str(uuid.uuid4()),
+            id_=str(uuid.uuid4()),
             user_id=current_user.id,
             action='delete_bank',
             details=f'Deleted bank: {bank.bank_name}'
@@ -1290,7 +1289,7 @@ def manage_bank(bank_id):
     
     # Log activity
     activity = Activity(
-        id=str(uuid.uuid4()),
+        id_=str(uuid.uuid4()),
         user_id=current_user.id,
         action='update_bank',
         details=f'Updated bank: {bank.bank_name}'
@@ -1314,7 +1313,7 @@ def manage_user(user_id):
         
         # Log activity
         activity = Activity(
-            id=str(uuid.uuid4()),
+            id_=str(uuid.uuid4()),
             user_id=current_user.id,
             action='delete_user',
             details=f'Deleted user: {user.email}'
@@ -1333,7 +1332,7 @@ def manage_user(user_id):
     
     # Log activity
     activity = Activity(
-        id=str(uuid.uuid4()),
+        id_=str(uuid.uuid4()),
         user_id=current_user.id,
         action='update_user',
         details=f'Updated user: {user.email}'
@@ -1357,7 +1356,7 @@ def manage_subscription(subscription_id):
         
         # Log activity
         activity = Activity(
-            id=str(uuid.uuid4()),
+            id_=str(uuid.uuid4()),
             user_id=current_user.id,
             action='delete_subscription',
             details=f'Deleted subscription for user: {subscription.user.email}'
@@ -1376,7 +1375,7 @@ def manage_subscription(subscription_id):
     
     # Log activity
     activity = Activity(
-        id=str(uuid.uuid4()),
+        id_=str(uuid.uuid4()),
         user_id=current_user.id,
         action='update_subscription',
         details=f'Updated subscription for user: {subscription.user.email}'
