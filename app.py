@@ -1112,6 +1112,55 @@ def admin_dashboard():
                          subscriptions=subscriptions,
                          extractions=extractions)
 
+# Admin routes for adding new items
+@app.route('/admin/user/add', methods=['POST'])
+@login_required
+def add_user():
+    if not current_user.is_admin:
+        return jsonify({'error': 'Access denied'}), 403
+    
+    data = request.json
+    name = data.get('name')
+    email = data.get('email')
+    password = data.get('password')
+    role = data.get('role', 'user')
+    
+    if not all([name, email, password]):
+        return jsonify({'error': 'Name, email, and password are required'}), 400
+    
+    # Check if user already exists
+    if User.query.filter_by(email=email).first():
+        return jsonify({'error': 'User with this email already exists'}), 400
+    
+    # Hash password
+    hashed_password = generate_password_hash(password)
+    
+    # Create new user
+    new_user = User(
+        id=str(uuid.uuid4()),
+        name=name,
+        email=email,
+        password=hashed_password,
+        role=role,
+        is_admin=(role == 'admin'),
+        active=True
+    )
+    
+    db.session.add(new_user)
+    db.session.commit()
+    
+    # Log activity
+    activity = Activity(
+        id=str(uuid.uuid4()),
+        user_id=current_user.id,
+        action='add_user',
+        details=f'Added new user: {email}'
+    )
+    db.session.add(activity)
+    db.session.commit()
+    
+    return jsonify({'message': 'User added successfully', 'user': new_user.to_dict()})
+
 @app.route('/admin/bank/add', methods=['POST'])
 @login_required
 def add_bank():
@@ -1119,15 +1168,29 @@ def add_bank():
         return jsonify({'error': 'Access denied'}), 403
     
     data = request.json
-    bank = Bank(
+    bank_name = data.get('name')
+    account_number = data.get('accountNumber')
+    account_type = data.get('accountType')
+    user_id = data.get('userId')
+    
+    if not all([bank_name, account_number, account_type, user_id]):
+        return jsonify({'error': 'All fields are required'}), 400
+    
+    # Check if user exists
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    # Create new bank
+    new_bank = Bank(
         id=str(uuid.uuid4()),
-        user_id=current_user.id,
-        bank_name=data['name'],
-        account_number=data.get('account_number'),
-        account_type=data.get('account_type'),
-        created_at=datetime.utcnow()
+        user_id=user_id,
+        bank_name=bank_name,
+        account_number=account_number,
+        account_type=account_type
     )
-    db.session.add(bank)
+    
+    db.session.add(new_bank)
     db.session.commit()
     
     # Log activity
@@ -1135,13 +1198,66 @@ def add_bank():
         id=str(uuid.uuid4()),
         user_id=current_user.id,
         action='add_bank',
-        details=f'Added bank: {bank.bank_name}'
+        details=f'Added new bank: {bank_name} for user: {user.email}'
     )
     db.session.add(activity)
     db.session.commit()
     
-    return jsonify({'message': 'Bank added successfully', 'bank': bank.to_dict()})
+    return jsonify({'message': 'Bank added successfully', 'bank': new_bank.to_dict()})
 
+@app.route('/admin/subscription/add', methods=['POST'])
+@login_required
+def add_subscription():
+    if not current_user.is_admin:
+        return jsonify({'error': 'Access denied'}), 403
+    
+    data = request.json
+    user_id = data.get('user')
+    plan = data.get('plan')
+    start_date = data.get('startDate')
+    end_date = data.get('endDate')
+    
+    if not all([user_id, plan, start_date, end_date]):
+        return jsonify({'error': 'All fields are required'}), 400
+    
+    # Check if user exists
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    # Parse dates
+    try:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+    except ValueError:
+        return jsonify({'error': 'Invalid date format'}), 400
+    
+    # Create new subscription
+    new_subscription = Subscription(
+        id=str(uuid.uuid4()),
+        user_id=user_id,
+        plan=plan,
+        status='active',
+        start_date=start_date,
+        end_date=end_date
+    )
+    
+    db.session.add(new_subscription)
+    db.session.commit()
+    
+    # Log activity
+    activity = Activity(
+        id=str(uuid.uuid4()),
+        user_id=current_user.id,
+        action='add_subscription',
+        details=f'Added new subscription: {plan} for user: {user.email}'
+    )
+    db.session.add(activity)
+    db.session.commit()
+    
+    return jsonify({'message': 'Subscription added successfully', 'subscription': new_subscription.to_dict()})
+
+# Admin routes for managing existing items
 @app.route('/admin/bank/<string:bank_id>', methods=['PUT', 'DELETE'])
 @login_required
 def manage_bank(bank_id):

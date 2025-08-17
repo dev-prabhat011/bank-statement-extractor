@@ -3,30 +3,250 @@
 {# ADMIN DASHBOARD - COMPLETELY UPDATED AND FIXED - Routing issue resolved #}
 {% block title %}Admin Dashboard - Bank Statement Extractor{% endblock %}
 
+{% block head %}
+<style>
+.admin-container {
+    padding: 2rem;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+}
+
+.admin-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    background: white;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.admin-header h1 {
+    color: #2c3e50;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.stat-icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1.5rem;
+}
+
+.stat-content h3 {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-number {
+    color: #2c3e50;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.admin-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.admin-section {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.section-header {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-header h2 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.table-container {
+    padding: 1.5rem;
+}
+
+.admin-table {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.admin-table th {
+    background: #f8f9fa;
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+.admin-table td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-top: 1px solid #dee2e6;
+}
+
+.admin-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.admin-actions {
+    text-align: center;
+    margin-top: 3rem;
+    padding: 2rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.admin-actions .btn {
+    margin: 0 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.badge {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 20px;
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 0.375rem;
+}
+
+.alert {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.modal-content {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px 15px 0 0;
+}
+
+.modal-header .btn-close {
+    filter: invert(1);
+}
+
+@media (max-width: 768px) {
+    .admin-container {
+        padding: 1rem;
+    }
+    
+    .admin-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .admin-actions .btn {
+        display: block;
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <!-- Admin Dashboard - Updated and Fixed -->
 <div class="admin-container">
     <div class="admin-header">
-        <h1>Admin Dashboard</h1>
-        <p>Manage your bank statement extraction system</p>
+        <h1><i class="fas fa-tachometer-alt me-3"></i>Admin Dashboard</h1>
+        <p class="text-muted">Manage your bank statement extraction system</p>
     </div>
 
     <div class="admin-stats">
         <div class="stat-card">
-            <h3>Total Users</h3>
-            <div class="stat-number">{{ total_users|default(0) }}</div>
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Total Users</h3>
+                <div class="stat-number">{{ total_users|default(0) }}</div>
+            </div>
         </div>
         <div class="stat-card">
-            <h3>Total Banks</h3>
-            <div class="stat-number">{{ total_banks|default(0) }}</div>
+            <div class="stat-icon">
+                <i class="fas fa-university"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Total Banks</h3>
+                <div class="stat-number">{{ total_banks|default(0) }}</div>
+            </div>
         </div>
         <div class="stat-card">
-            <h3>Total Subscriptions</h3>
-            <div class="stat-number">{{ total_subscriptions|default(0) }}</div>
+            <div class="stat-icon">
+                <i class="fas fa-credit-card"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Total Subscriptions</h3>
+                <div class="stat-number">{{ total_subscriptions|default(0) }}</div>
+            </div>
         </div>
         <div class="stat-card">
-            <h3>Total Extractions</h3>
-            <div class="stat-number">{{ total_extractions|default(0) }}</div>
+            <div class="stat-icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Total Extractions</h3>
+                <div class="stat-number">{{ total_extractions|default(0) }}</div>
+            </div>
         </div>
     </div>
 
@@ -34,14 +254,14 @@
         <!-- Users Section -->
         <div class="admin-section">
             <div class="section-header">
-                <h2>Users</h2>
+                <h2><i class="fas fa-users me-2"></i>Users</h2>
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
-                    <i class="fas fa-plus"></i> Add User
+                    <i class="fas fa-plus me-2"></i>Add User
                 </button>
             </div>
             <div class="table-container">
-                <table id="usersTable" class="admin-table">
-                    <thead>
+                <table id="usersTable" class="admin-table table table-striped table-hover">
+                    <thead class="table-dark">
                         <tr>
                             <th>Name</th>
                             <th>Email</th>
@@ -54,9 +274,9 @@
                     <tbody>
                         {% for user in users|default([]) %}
                         <tr>
-                            <td>{{ user.name }}</td>
+                            <td><strong>{{ user.name }}</strong></td>
                             <td>{{ user.email }}</td>
-                            <td>{{ user.role }}</td>
+                            <td><span class="badge bg-info">{{ user.role|title }}</span></td>
                             <td>
                                 <span class="badge {% if user.active %}bg-success{% else %}bg-danger{% endif %}">
                                     {{ 'Active' if user.active else 'Inactive' }}
@@ -64,10 +284,10 @@
                             </td>
                             <td>{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else 'N/A' }}</td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary edit-user" data-user-id="{{ user.id }}">
+                                <button class="btn btn-sm btn-outline-primary edit-user me-1" data-user-id="{{ user.id }}" title="Edit User">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-danger delete-user" data-user-id="{{ user.id }}">
+                                <button class="btn btn-sm btn-outline-danger delete-user" data-user-id="{{ user.id }}" title="Delete User">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -81,14 +301,14 @@
         <!-- Banks Section -->
         <div class="admin-section">
             <div class="section-header">
-                <h2>Banks</h2>
+                <h2><i class="fas fa-university me-2"></i>Banks</h2>
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBankModal">
-                    <i class="fas fa-plus"></i> Add Bank
+                    <i class="fas fa-plus me-2"></i>Add Bank
                 </button>
             </div>
             <div class="table-container">
-                <table id="banksTable" class="admin-table">
-                    <thead>
+                <table id="banksTable" class="admin-table table table-striped table-hover">
+                    <thead class="table-dark">
                         <tr>
                             <th>Bank Name</th>
                             <th>Account Number</th>
@@ -101,16 +321,16 @@
                     <tbody>
                         {% for bank in banks|default([]) %}
                         <tr>
-                            <td>{{ bank.bank_name }}</td>
-                            <td>{{ bank.account_number }}</td>
-                            <td>{{ bank.account_type }}</td>
+                            <td><strong>{{ bank.bank_name }}</strong></td>
+                            <td><code>{{ bank.account_number }}</code></td>
+                            <td><span class="badge bg-secondary">{{ bank.account_type }}</span></td>
                             <td>{{ bank.user.name if bank.user else 'N/A' }}</td>
                             <td>{{ bank.created_at.strftime('%Y-%m-%d') if bank.created_at else 'N/A' }}</td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary edit-bank" data-bank-id="{{ bank.id }}">
+                                <button class="btn btn-sm btn-outline-primary edit-bank me-1" data-bank-id="{{ bank.id }}" title="Edit Bank">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-danger delete-bank" data-bank-id="{{ bank.id }}">
+                                <button class="btn btn-sm btn-outline-danger delete-bank" data-bank-id="{{ bank.id }}" title="Delete Bank">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -124,14 +344,14 @@
         <!-- Subscriptions Section -->
         <div class="admin-section">
             <div class="section-header">
-                <h2>Subscriptions</h2>
+                <h2><i class="fas fa-credit-card me-2"></i>Subscriptions</h2>
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSubscriptionModal">
-                    <i class="fas fa-plus"></i> Add Subscription
+                    <i class="fas fa-plus me-2"></i>Add Subscription
                 </button>
             </div>
             <div class="table-container">
-                <table id="subscriptionsTable" class="admin-table">
-                    <thead>
+                <table id="subscriptionsTable" class="admin-table table table-striped table-hover">
+                    <thead class="table-dark">
                         <tr>
                             <th>User</th>
                             <th>Plan</th>
@@ -144,8 +364,8 @@
                     <tbody>
                         {% for subscription in subscriptions|default([]) %}
                         <tr>
-                            <td>{{ subscription.user.name if subscription.user else 'N/A' }}</td>
-                            <td>{{ subscription.plan }}</td>
+                            <td><strong>{{ subscription.user.name if subscription.user else 'N/A' }}</strong></td>
+                            <td><span class="badge bg-warning text-dark">{{ subscription.plan|title }}</span></td>
                             <td>{{ subscription.start_date.strftime('%Y-%m-%d') if subscription.start_date else 'N/A' }}</td>
                             <td>{{ subscription.end_date.strftime('%Y-%m-%d') if subscription.end_date else 'N/A' }}</td>
                             <td>
@@ -154,10 +374,10 @@
                                 </span>
                             </td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary edit-subscription" data-subscription-id="{{ subscription.id }}">
+                                <button class="btn btn-sm btn-outline-primary edit-subscription me-1" data-subscription-id="{{ subscription.id }}" title="Edit Subscription">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-danger delete-subscription" data-subscription-id="{{ subscription.id }}">
+                                <button class="btn btn-sm btn-outline-danger delete-subscription" data-subscription-id="{{ subscription.id }}" title="Delete Subscription">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -171,11 +391,11 @@
         <!-- Extractions Section -->
         <div class="admin-section">
             <div class="section-header">
-                <h2>Extractions</h2>
+                <h2><i class="fas fa-file-alt me-2"></i>Extractions</h2>
             </div>
             <div class="table-container">
-                <table id="extractionsTable" class="admin-table">
-                    <thead>
+                <table id="extractionsTable" class="admin-table table table-striped table-hover">
+                    <thead class="table-dark">
                         <tr>
                             <th>User</th>
                             <th>Bank</th>
@@ -188,9 +408,9 @@
                     <tbody>
                         {% for extraction in extractions|default([]) %}
                         <tr>
-                            <td>{{ extraction.user.name if extraction.user else 'N/A' }}</td>
+                            <td><strong>{{ extraction.user.name if extraction.user else 'N/A' }}</strong></td>
                             <td>{{ extraction.bank.bank_name if extraction.bank else 'N/A' }}</td>
-                            <td>{{ extraction.file_name }}</td>
+                            <td><code>{{ extraction.file_name }}</code></td>
                             <td>
                                 <span class="badge {% if extraction.status == 'completed' %}bg-success{% elif extraction.status == 'processing' %}bg-warning{% else %}bg-danger{% endif %}">
                                     {{ extraction.status|title }}
@@ -198,7 +418,7 @@
                             </td>
                             <td>{{ extraction.timestamp.strftime('%Y-%m-%d %H:%M') if extraction.timestamp else 'N/A' }}</td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary">
+                                <button class="btn btn-sm btn-outline-primary" title="View Details">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </td>
@@ -211,8 +431,12 @@
     </div>
 
     <div class="admin-actions">
-        <a href="{{ url_for('home_page') }}" class="btn btn-secondary">Back to Home</a>
-        <button class="btn btn-primary">Refresh Stats</button>
+        <a href="{{ url_for('home_page') }}" class="btn btn-secondary">
+            <i class="fas fa-home me-2"></i>Back to Home
+        </a>
+        <button class="btn btn-primary" onclick="location.reload()">
+            <i class="fas fa-sync-alt me-2"></i>Refresh Stats
+        </button>
     </div>
 </div>
 
@@ -464,6 +688,132 @@
 
 {% block scripts %}
 <script>
+    // Add User
+    $('#saveUserBtn').click(function() {
+        var formData = {
+            name: $('#userName').val(),
+            email: $('#userEmail').val(),
+            password: $('#userPassword').val(),
+            role: $('#userRole').val()
+        };
+        
+        $.ajax({
+            url: '/admin/user/add',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function(response) {
+                $('#addUserModal').modal('hide');
+                // Clear form
+                $('#addUserForm')[0].reset();
+                // Show success message
+                showAlert('success', 'User added successfully!');
+                // Reload page after a short delay
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            },
+            error: function(xhr) {
+                var errorMsg = 'Error adding user';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMsg += ': ' + xhr.responseJSON.error;
+                }
+                showAlert('danger', errorMsg);
+            }
+        });
+    });
+    
+    // Add Bank
+    $('#saveBankBtn').click(function() {
+        var formData = {
+            name: $('#bankName').val(),
+            accountNumber: $('#bankAccountNumber').val(),
+            accountType: $('#bankAccountType').val(),
+            userId: $('#bankUserId').val() || '{{ current_user.id }}'
+        };
+        
+        $.ajax({
+            url: '/admin/bank/add',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function(response) {
+                $('#addBankModal').modal('hide');
+                // Clear form
+                $('#addBankForm')[0].reset();
+                // Show success message
+                showAlert('success', 'Bank added successfully!');
+                // Reload page after a short delay
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            },
+            error: function(xhr) {
+                var errorMsg = 'Error adding bank';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMsg += ': ' + xhr.responseJSON.error;
+                }
+                showAlert('danger', errorMsg);
+            }
+        });
+    });
+    
+    // Add Subscription
+    $('#saveSubscriptionBtn').click(function() {
+        var formData = {
+            user: $('#subscriptionUser').val(),
+            plan: $('#subscriptionPlan').val(),
+            startDate: $('#subscriptionStartDate').val(),
+            endDate: $('#subscriptionEndDate').val()
+        };
+        
+        $.ajax({
+            url: '/admin/subscription/add',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function(response) {
+                $('#addSubscriptionModal').modal('hide');
+                // Clear form
+                $('#addSubscriptionForm')[0].reset();
+                // Show success message
+                showAlert('success', 'Subscription added successfully!');
+                // Reload page after a short delay
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            },
+            error: function(xhr) {
+                var errorMsg = 'Error adding subscription';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMsg += ': ' + xhr.responseJSON.error;
+                }
+                showAlert('danger', errorMsg);
+            }
+        });
+    });
+    
+    // Helper function to show alerts
+    function showAlert(type, message) {
+        var alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        // Remove existing alerts
+        $('.alert').remove();
+        
+        // Add new alert at the top
+        $('.admin-container').prepend(alertHtml);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut();
+        }, 5000);
+    }
+    
     // Initialize DataTables
     $(document).ready(function() {
         $('#banksTable').DataTable();
@@ -475,29 +825,6 @@
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl)
-        });
-        
-        // Add Bank
-        $('#saveBankBtn').click(function() {
-            var formData = {
-                name: $('#bankName').val(),
-                country: $('#bankCountry').val(),
-                active: $('#bankActive').is(':checked')
-            };
-            
-            $.ajax({
-                url: '/admin/bank/add',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(formData),
-                success: function(response) {
-                    $('#addBankModal').modal('hide');
-                    location.reload();
-                },
-                error: function(xhr) {
-                    alert('Error adding bank: ' + xhr.responseJSON.error);
-                }
-            });
         });
         
         // Edit Bank
