@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}Processing File - Bank Statement Extractor{% endblock %}
+{% block content %}
+<div class="container main-container my-5">
+    <div class="text-center">
+        <div class="processing-animation mb-4">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Processing...</span>
+            </div>
+        </div>
+        
+        <h2 class="mb-3">Processing Your Bank Statement</h2>
+        <p class="lead mb-4">Please wait while we extract and analyze your data...</p>
+        
+        <div class="progress mb-4" style="height: 25px;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                 role="progressbar" 
+                 style="width: 0%" 
+                 id="processingProgress">
+                Processing...
+            </div>
+        </div>
+        
+        <div class="processing-steps">
+            <div class="step active" id="step1">
+                <i class="fas fa-file-upload text-success"></i>
+                <span>File Uploaded</span>
+            </div>
+            <div class="step" id="step2">
+                <i class="fas fa-cog fa-spin text-primary"></i>
+                <span>Extracting Data</span>
+            </div>
+            <div class="step" id="step3">
+                <i class="fas fa-chart-bar text-info"></i>
+                <span>Analyzing Transactions</span>
+            </div>
+            <div class="step" id="step4">
+                <i class="fas fa-download text-warning"></i>
+                <span>Preparing Downloads</span>
+            </div>
+            <div class="step" id="step5">
+                <i class="fas fa-check-circle text-success"></i>
+                <span>Complete</span>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <small class="text-muted">
+                This may take a few minutes depending on the file size and complexity.
+            </small>
+        </div>
+    </div>
+</div>
+
+<style>
+.processing-animation {
+    margin: 2rem 0;
+}
+
+.processing-steps {
+    display: flex;
+    justify-content: space-between;
+    max-width: 600px;
+    margin: 2rem auto;
+    position: relative;
+}
+
+.processing-steps::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #e9ecef;
+    z-index: -1;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: white;
+    padding: 1rem;
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+
+.step.active {
+    background: #007bff;
+    color: white;
+    transform: scale(1.1);
+}
+
+.step.completed {
+    background: #28a745;
+    color: white;
+}
+
+.step i {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.step span {
+    font-size: 0.8rem;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.progress {
+    border-radius: 15px;
+    background-color: #f8f9fa;
+}
+
+.progress-bar {
+    border-radius: 15px;
+    font-weight: bold;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const progressBar = document.getElementById('processingProgress');
+    const steps = document.querySelectorAll('.step');
+    
+    // Simulate processing steps
+    let currentStep = 1;
+    let progress = 0;
+    
+    const updateProgress = () => {
+        if (progress < 100) {
+            progress += Math.random() * 15;
+            if (progress > 100) progress = 100;
+            
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = Math.round(progress) + '%';
+            
+            // Update steps
+            if (progress > 20 && currentStep === 1) {
+                steps[0].classList.remove('active');
+                steps[0].classList.add('completed');
+                steps[1].classList.add('active');
+                currentStep = 2;
+            } else if (progress > 40 && currentStep === 2) {
+                steps[1].classList.remove('active');
+                steps[1].classList.add('completed');
+                steps[2].classList.add('active');
+                currentStep = 3;
+            } else if (progress > 60 && currentStep === 3) {
+                steps[2].classList.remove('active');
+                steps[2].classList.add('completed');
+                steps[3].classList.add('active');
+                currentStep = 4;
+            } else if (progress > 80 && currentStep === 4) {
+                steps[3].classList.remove('active');
+                steps[3].classList.add('completed');
+                steps[4].classList.add('active');
+                currentStep = 5;
+            }
+            
+            if (progress < 100) {
+                setTimeout(updateProgress, 500 + Math.random() * 1000);
+            } else {
+                // Redirect to results page when complete
+                setTimeout(() => {
+                    window.location.href = '{{ url_for("process_file") }}';
+                }, 1000);
+            }
+        }
+    };
+    
+    // Start progress simulation
+    setTimeout(updateProgress, 1000);
+});
+</script>
+{% endblock %}

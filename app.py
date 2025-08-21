@@ -718,87 +718,129 @@ def upload_file():
             file.save(file_path)
             logger.info("File saved successfully.")
 
-            extractor = StatementExtractor(
-                file_path,
-                start_date_str=start_date,
-                end_date_str=end_date,
-                password=password,
-                debug=app.debug,
-                bank_name=bank_name
-            )
+            # Store file info in session for async processing
+            session['processing_file'] = {
+                'path': file_path,
+                'start_date': start_date,
+                'end_date': end_date,
+                'password': password,
+                'bank_name': bank_name,
+                'output_formats': output_formats,
+                'filename': filename
+            }
 
-            logger.info("Calling extractor.extract_all()")
-            # Ensure extractor returns 3 values and they are unpacked correctly
-            transactions, account_info, analysis_results = extractor.extract_all()
-            logger.info(f"Extractor finished. Transactions found: {len(transactions)}")
-
-
-            base_name = os.path.splitext(filename)[0]
-            result_files = []
-
-            # Export logic
-            if 'excel' in output_formats:
-                if transactions: # Only export if transactions exist
-                    excel_fname = f"{base_name}.xlsx"
-                    excel_path = os.path.join(output_folder_path, excel_fname)
-                    try:
-                        export_excel(extractor, excel_path)
-                        result_files.append(('Excel', excel_fname))
-                    except Exception as export_err:
-                         logger.error(f"Failed to export Excel: {export_err}", exc_info=True)
-                         flash(f"Processing successful, but failed to create Excel file: {export_err}", 'warning')
-                else:
-                     logger.warning("Skipping Excel export: No transactions found.")
-
-            if 'xml' in output_formats:
-                 if transactions: # Only export if transactions exist
-                    xml_fname = f"{base_name}.xml"
-                    xml_path = os.path.join(output_folder_path, xml_fname)
-                    try:
-                        export_xml(extractor, xml_path)
-                        result_files.append(('XML', xml_fname))
-                    except Exception as export_err:
-                        logger.error(f"Failed to export XML: {export_err}", exc_info=True)
-                        flash(f"Processing successful, but failed to create XML file: {export_err}", 'warning')
-                 else:
-                      logger.warning("Skipping XML export: No transactions found.")
-
-            # Log before render
-            logger.info(f"Rendering results page. Transactions length: {len(transactions)}")
-
-            return render_template('results.html',
-                                   transactions=transactions,
-                                   account_info=account_info,
-                                   analysis_results=analysis_results, # Pass analysis results if needed
-                                   result_files=result_files)
-
-        except ValueError as ve:
-             if os.path.exists(file_path):
-                 try: os.remove(file_path)
-                 except OSError as e: logger.error(f"Error removing file {file_path} after ValueError: {e}")
-             logger.warning(f"Processing ValueError: {ve}")
-             flash(f"Processing Error: {ve}")
-             if "password" in str(ve).lower():
-                  session['last_upload_path'] = file_path
-                  session['start_date'] = start_date
-                  session['end_date'] = end_date
-                  session['output_formats'] = output_formats
-                  return redirect(url_for('password_page'))
-             else:
-                  # Redirect to extractor page on other value errors
-                  return redirect(url_for('analyzer')) # <<< FIXED: Redirect to extractor page
+            # Start async processing
+            return redirect(url_for('processing_page'))
 
         except Exception as e:
-             logger.error(f"Caught unexpected exception during upload processing for file {filename}", exc_info=True)
-             if 'file_path' in locals() and os.path.exists(file_path):
-                 try: os.remove(file_path)
-                 except OSError as e_os: logger.error(f"Error removing file {file_path} after Exception: {e_os}")
-             flash(f'An unexpected error occurred during processing. Please check logs or try again.')
-             # Redirect to extractor page on unexpected errors
-             return redirect(url_for('index')) # <<< FIXED: Redirect to extractor page
+            logger.error(f"Error saving file: {e}", exc_info=True)
+            flash('Error saving uploaded file. Please try again.')
+            return redirect(url_for('index'))
+
     else:
         flash('Invalid file type. Only PDF files are allowed.')
         return redirect(url_for('index')) # Redirect back to extractor page
+
+
+@app.route('/processing')
+@login_required
+def processing_page():
+    """Shows processing page while file is being processed."""
+    file_info = session.get('processing_file')
+    if not file_info:
+        flash('No file to process. Please upload a file first.')
+        return redirect(url_for('index'))
+    
+    return render_template('processing.html')
+
+
+@app.route('/process_file')
+@login_required
+def process_file():
+    """Process the uploaded file and show results."""
+    file_info = session.get('processing_file')
+    if not file_info:
+        flash('No file to process. Please upload a file first.')
+        return redirect(url_for('index'))
+    
+    try:
+        file_path = file_info['path']
+        start_date = file_info['start_date']
+        end_date = file_info['end_date']
+        password = file_info['password']
+        bank_name = file_info['bank_name']
+        output_formats = file_info['output_formats']
+        filename = file_info['filename']
+
+        logger.info("Starting file processing...")
+        
+        extractor = StatementExtractor(
+            file_path,
+            start_date_str=start_date,
+            end_date_str=end_date,
+            password=password,
+            debug=app.debug,
+            bank_name=bank_name
+        )
+
+        logger.info("Calling extractor.extract_all()")
+        transactions, account_info, analysis_results = extractor.extract_all()
+        logger.info(f"Extractor finished. Transactions found: {len(transactions)}")
+
+        base_name = os.path.splitext(filename)[0]
+        result_files = []
+
+        # Export logic with progress tracking
+        if 'excel' in output_formats and transactions:
+            try:
+                excel_fname = f"{base_name}.xlsx"
+                excel_path = os.path.join(output_folder_path, excel_fname)
+                export_excel(extractor, excel_path)
+                result_files.append(('Excel', excel_fname))
+                logger.info("Excel export completed")
+            except Exception as export_err:
+                logger.error(f"Failed to export Excel: {export_err}", exc_info=True)
+                flash(f"Processing successful, but failed to create Excel file: {export_err}", 'warning')
+
+        if 'xml' in output_formats and transactions:
+            try:
+                xml_fname = f"{base_name}.xml"
+                xml_path = os.path.join(output_folder_path, xml_fname)
+                export_xml(extractor, xml_path)
+                result_files.append(('XML', xml_fname))
+                logger.info("XML export completed")
+            except Exception as export_err:
+                logger.error(f"Failed to export XML: {export_err}", exc_info=True)
+                flash(f"Processing successful, but failed to create XML file: {export_err}", 'warning')
+
+        # Clear session data
+        session.pop('processing_file', None)
+
+        logger.info(f"Rendering results page. Transactions length: {len(transactions)}")
+
+        return render_template('results.html',
+                               transactions=transactions,
+                               account_info=account_info,
+                               analysis_results=analysis_results,
+                               result_files=result_files)
+
+    except ValueError as ve:
+        logger.warning(f"Processing ValueError: {ve}")
+        flash(f"Processing Error: {ve}")
+        if "password" in str(ve).lower():
+            session['last_upload_path'] = file_path
+            session['start_date'] = start_date
+            session['end_date'] = end_date
+            session['output_formats'] = output_formats
+            return redirect(url_for('password_page'))
+        else:
+            flash(f"Processing Error: {ve}")
+            return redirect(url_for('index'))
+
+    except Exception as e:
+        logger.error(f"Caught unexpected exception during processing: {e}", exc_info=True)
+        flash(f'An unexpected error occurred during processing. Please check logs or try again.')
+        return redirect(url_for('index'))
 
 
 @app.route('/password', methods=['GET', 'POST'])
@@ -908,19 +950,55 @@ def password_page():
 @app.route('/download/<filename>')
 @login_required # <<< Keep protected
 def download_file(filename):
-    """Provides generated files for download."""
+    """Provides generated files for download with improved performance."""
     try:
         safe_filename = secure_filename(filename)
         logger.info(f"Attempting to send file: {safe_filename} from {output_folder_path}")
-        return send_from_directory(output_folder_path, # Use absolute path
-                                 safe_filename,
-                                 as_attachment=True)
+        
+        # Use streaming response for better performance
+        response = send_from_directory(
+            output_folder_path,
+            safe_filename,
+            as_attachment=True
+        )
+        
+        # Add headers to prevent caching issues
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        
+        return response
+        
     except FileNotFoundError:
         logger.error(f"Download requested for non-existent file: {filename}")
         abort(404, description="File not found")
     except Exception as e:
-         logger.error(f"Error during file download for {filename}", exc_info=True)
-         abort(500, description="Could not download file")
+        logger.error(f"Error during file download for {filename}", exc_info=True)
+        abort(500, description="Could not download file")
+
+
+@app.route('/download_async/<filename>')
+@login_required
+def download_async(filename):
+    """Async download endpoint that doesn't block the UI."""
+    try:
+        safe_filename = secure_filename(filename)
+        file_path = os.path.join(output_folder_path, safe_filename)
+        
+        if not os.path.exists(file_path):
+            return jsonify({'error': 'File not found'}), 404
+            
+        # Return file info for client-side download
+        file_size = os.path.getsize(file_path)
+        return jsonify({
+            'filename': safe_filename,
+            'size': file_size,
+            'download_url': url_for('download_file', filename=safe_filename)
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in async download for {filename}: {e}")
+        return jsonify({'error': 'Download failed'}), 500
 
 
 # --- Public API Endpoint for Salesforce Integration ---

@@ -99,4 +99,59 @@
     </div>
     {% endif %}
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click handlers for downloads to prevent UI blocking
+    const downloadButtons = document.querySelectorAll('.btn-success');
+    
+    downloadButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const originalText = this.textContent;
+            const downloadUrl = this.href;
+            
+            // Show loading state
+            this.textContent = 'Preparing Download...';
+            this.disabled = true;
+            this.classList.remove('btn-success');
+            this.classList.add('btn-secondary');
+            
+            // Create hidden iframe for download (prevents page blocking)
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = downloadUrl;
+            
+            // Add to page
+            document.body.appendChild(iframe);
+            
+            // Reset button after a short delay
+            setTimeout(() => {
+                this.textContent = originalText;
+                this.disabled = false;
+                this.classList.remove('btn-secondary');
+                this.classList.add('btn-success');
+                
+                // Remove iframe
+                document.body.removeChild(iframe);
+            }, 2000);
+        });
+    });
+    
+    // Add navigation buttons
+    const navigationDiv = document.createElement('div');
+    navigationDiv.className = 'text-center mt-4';
+    navigationDiv.innerHTML = `
+        <a href="{{ url_for('index') }}" class="btn btn-primary me-3">
+            <i class="fas fa-upload"></i> Process Another File
+        </a>
+        <a href="{{ url_for('home_page') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-home"></i> Back to Home
+        </a>
+    `;
+    
+    document.querySelector('.container').appendChild(navigationDiv);
+});
+</script>
 {% endblock %}
